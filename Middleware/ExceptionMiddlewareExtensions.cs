@@ -15,16 +15,19 @@ namespace SchoolERP.Middleware
 
                     int statusCode = exception switch
                     {
-                        UserNotFoundException       => 404,
-                        AdminNotFoundException      => 404,
-                        TeacherNotFoundException    => 404,
-                        StudentNotFoundException    => 404,
-                        InvalidCredentialsException => 401,
-                        UserInactiveException       => 403,
-                        AdminAlreadyExistsException => 409,
-                        SamePasswordException       => 400,
-                        IncorrectPasswordException  => 400,
-                        _                           => 500
+                        UserNotFoundException                           => 404,
+                        AdminNotFoundException                          => 404,
+                        TeacherNotFoundException                        => 404,
+                        StudentNotFoundException                        => 404,
+                        InvalidCredentialsException                     => 401,
+                        UserInactiveException                           => 403,
+                        AdminAlreadyExistsException                     => 409,
+                        SamePasswordException                           => 400,
+                        IncorrectPasswordException                      => 400,
+                        StudentClassNotFoundException                   => 404,
+                        StudentClassAlreadyExistsException              => 409,
+                        TeacherAlreadyAssignedAsClassTeacherException   => 409,
+                        _                                               => 500
                     };
 
                     context.Response.StatusCode = statusCode;

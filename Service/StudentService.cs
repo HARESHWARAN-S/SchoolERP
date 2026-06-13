@@ -68,5 +68,15 @@ namespace SchoolERP.Services
                 Timestamp = n.Timestamp
             }).ToList();
         }
+        /*
+        public async Task<string> GetMyTimeTableAsync(string admnNo)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed their timetable");
+            return student.TimeTableUrl;
+        }*/
     }
 }

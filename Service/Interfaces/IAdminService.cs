@@ -16,5 +16,8 @@ namespace SchoolERP.Services.Interfaces
         Task<List<StudentListDto>> GetAllStudentsAsync();
         Task<NotificationResponseDto> AddNotificationAsync(CreateNotificationDto dto);
         Task<List<NotificationResponseDto>> GetAllNotificationsAsync();
+        Task<StudentClassResponseDto> AddStudentClassAsync(CreateStudentClassDto dto);
+        //Task<bool> RemoveStudentClassAsync(string Class, string sec);
+        Task<List<StudentClassResponseDto>> GetAllStudentClassesAsync();
     }
 }

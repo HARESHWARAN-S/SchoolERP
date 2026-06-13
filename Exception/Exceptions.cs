@@ -53,4 +53,22 @@ namespace SchoolERP.Exceptions
         public IncorrectPasswordException()
             : base("Current password is incorrect") { }
     }
+
+        public class StudentClassNotFoundException : Exception
+    {
+        public StudentClassNotFoundException(string Class, string sec)
+            : base($"Class '{Class}-{sec}' not found") { }
+    }
+
+    public class StudentClassAlreadyExistsException : Exception
+    {
+        public StudentClassAlreadyExistsException(string Class, string sec)
+            : base($"Class '{Class}-{sec}' already exists") { }
+    }
+
+    public class TeacherAlreadyAssignedAsClassTeacherException : Exception
+    {
+        public TeacherAlreadyAssignedAsClassTeacherException(string teacherId)
+            : base($"Teacher '{teacherId}' is already a class teacher of another class") { }
+    }
 }

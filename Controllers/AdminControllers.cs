@@ -96,5 +96,30 @@ namespace SchoolERP.Controllers
             var result = await _adminService.GetAllNotificationsAsync();
             return Ok(result);
         }
+        // Add Student Class
+        [HttpPost("add-class")]
+        public async Task<IActionResult> AddStudentClass([FromBody] CreateStudentClassDto dto)
+        {
+            var result = await _adminService.AddStudentClassAsync(dto);
+            return Ok(result);
+        }
+        /*
+        // Remove Student Class
+        [HttpDelete("remove-class")]
+        public async Task<IActionResult> RemoveStudentClass(
+            [FromQuery] string className,
+            [FromQuery] string sec)
+        {
+            await _adminService.RemoveStudentClassAsync(className, sec);
+            return Ok($"Class '{className}-{sec}' removed successfully");
+        }*/
+
+        // Get All Classes
+        [HttpGet("classes")]
+        public async Task<IActionResult> GetAllStudentClasses()
+        {
+            var result = await _adminService.GetAllStudentClassesAsync();
+            return Ok(result);
+        }
     }
 }

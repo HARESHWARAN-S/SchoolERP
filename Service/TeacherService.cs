@@ -49,6 +49,16 @@ namespace SchoolERP.Services
             };
         }
 
+        public async Task<string> GetMyTimeTableAsync(string teacherId)
+        {
+            var teacher = await _teacherRepo.GetByIdAsync(teacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(teacherId);
+
+            await _logRepo.AddAsync($"Teacher '{teacherId}' viewed their timetable");
+            return teacher.TimeTableUrl;
+        }
+
         public async Task<List<NotificationResponseDto>> GetMyNotificationsAsync()
         {
             var notifications = await _notificationRepo.GetByTargetAsync(NotificationTarget.Teacher);

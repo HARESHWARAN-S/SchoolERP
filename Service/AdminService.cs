@@ -15,6 +15,7 @@ namespace SchoolERP.Services
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
         private readonly INotificationRepository _notificationRepo;
+        private readonly IStudentClassRepository _studentClassRepo;
 
         public AdminService(
             IAdminRepository adminRepo,
@@ -22,7 +23,8 @@ namespace SchoolERP.Services
             IStudentRepository studentRepo,
             ILoginRepository loginRepo,
             ILogRepository logRepo,
-            INotificationRepository notificationRepo)
+            INotificationRepository notificationRepo,
+            IStudentClassRepository studentClassRepo)
         {
             _adminRepo = adminRepo;
             _teacherRepo = teacherRepo;
@@ -30,6 +32,7 @@ namespace SchoolERP.Services
             _loginRepo = loginRepo;
             _logRepo = logRepo;
             _notificationRepo = notificationRepo;
+            _studentClassRepo = studentClassRepo;
         }
 
         // ── Admin Setup ───────────────────────────────────────────────────
@@ -190,6 +193,10 @@ namespace SchoolERP.Services
 
         public async Task<StudentResponseDto> AddStudentAsync(CreateStudentDto dto)
         {
+            var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+                
             string admnNo = await _studentRepo.GetNextStudentIdAsync();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
@@ -352,5 +359,75 @@ namespace SchoolERP.Services
             PresentDays = s.PresentDays,
             AttendancePercentage = s.AttendancePercentage
         };
+
+        // ── StudentClass ──────────────────────────────────────────────────
+
+        public async Task<StudentClassResponseDto> AddStudentClassAsync(CreateStudentClassDto dto)
+        {
+            // Check class already exists
+            var existing = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
+            if (existing != null)
+                throw new StudentClassAlreadyExistsException(dto.Class, dto.Sec);
+
+            // Check teacher exists and is active
+            var teacher = await _teacherRepo.GetByIdAsync(dto.ClassTeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.ClassTeacherId);
+
+            var teacherStatus = await _loginRepo.GetStatusAsync(dto.ClassTeacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.ClassTeacherId);
+
+            // Check teacher not already assigned as class teacher
+            var alreadyAssigned = await _studentClassRepo.GetByTeacherIdAsync(dto.ClassTeacherId);
+            if (alreadyAssigned != null)
+                throw new TeacherAlreadyAssignedAsClassTeacherException(dto.ClassTeacherId);
+
+            var studentClass = new StudentClass
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                ClassTimetable = dto.ClassTimetable,
+                ClassTeacherId = dto.ClassTeacherId
+            };
+
+            await _studentClassRepo.AddAsync(studentClass);
+            await _logRepo.AddAsync($"Admin added class '{dto.Class}-{dto.Sec}' with class teacher '{dto.ClassTeacherId}'");
+
+            return new StudentClassResponseDto
+            {
+                Class = studentClass.Class,
+                Sec = studentClass.Sec,
+                ClassTimetable = studentClass.ClassTimetable,
+                ClassTeacherId = studentClass.ClassTeacherId,
+                ClassTeacherName = teacher.Name
+            };
+        }
+        /*
+        public async Task<bool> RemoveStudentClassAsync(string Class, string sec)
+        {
+            var studentClass = await _studentClassRepo.GetAsync(Class, sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(Class, sec);
+
+            await _studentClassRepo.DeleteAsync(studentClass);
+            await _logRepo.AddAsync($"Admin removed class '{Class}-{sec}'");
+
+            return true;
+        }*/
+
+        public async Task<List<StudentClassResponseDto>> GetAllStudentClassesAsync()
+        {
+            var classes = await _studentClassRepo.GetAllAsync();
+
+            return classes.Select(sc => new StudentClassResponseDto
+            {
+                Class = sc.Class,
+                Sec = sc.Sec,
+                ClassTimetable = sc.ClassTimetable,
+                ClassTeacherId = sc.ClassTeacherId,
+                ClassTeacherName = sc.ClassTeacher?.Name ?? "Unknown"
+            }).ToList();
+        }
     }
 }

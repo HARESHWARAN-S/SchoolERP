@@ -6,5 +6,6 @@ namespace SchoolERP.Services.Interfaces
     {
         Task<StudentResponseDto> GetMyDetailsAsync(string admnNo);
         Task<List<NotificationResponseDto>> GetMyNotificationsAsync();
+        //Task<string> GetMyTimeTableAsync(string admnNo);
     }
 }

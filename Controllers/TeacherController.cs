@@ -36,6 +36,14 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
+        [HttpGet("MyTimeTable")]
+        public async Task<IActionResult> GetMyTimeTable()
+        {
+            string teacherId = GetCurrentUserId(); // ← from JWT token
+            var result = await _teacherService.GetMyTimeTableAsync(teacherId);
+            return Ok(result);
+        }
+
         [HttpGet("view-notifications")]
         public async Task<IActionResult> GetMyNotifications()
         {

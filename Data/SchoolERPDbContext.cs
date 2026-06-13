@@ -14,10 +14,14 @@ namespace SchoolERP.Contexts
         public DbSet<Log> Logs { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<StudentClass> StudentClasses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            // Composite Primary Key
+            modelBuilder.Entity<StudentClass>()
+                .HasKey(sc => new { sc.Class, sc.Sec });
 
             // Decimal Precision
             modelBuilder.Entity<Admin>()
@@ -60,6 +64,16 @@ namespace SchoolERP.Contexts
                 .HasOne(s => s.Login)
                 .WithOne(l => l.Student)
                 .HasForeignKey<Student>(s => s.AdmnNo);
+
+            modelBuilder.Entity<StudentClass>()
+                .HasOne(sc => sc.ClassTeacher)
+                .WithOne()
+                .HasForeignKey<StudentClass>(sc => sc.ClassTeacherId);
+
+            // Enum conversions if needed
+            modelBuilder.Entity<StudentClass>()
+                .Property(sc => sc.ClassTeacherId)
+                .IsRequired();
         }
     }
 }
