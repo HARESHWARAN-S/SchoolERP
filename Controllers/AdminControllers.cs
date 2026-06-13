@@ -121,5 +121,13 @@ namespace SchoolERP.Controllers
             var result = await _adminService.GetAllStudentClassesAsync();
             return Ok(result);
         }
+
+        // Mark Teacher Attendance
+        [HttpPost("mark-teacher-attendance")]
+        public async Task<IActionResult> MarkTeacherAttendance([FromBody] MarkTeacherAttendanceDto dto)
+        {
+            var result = await _adminService.MarkTeacherAttendanceAsync(dto);
+            return Ok(result);
+        }
     }
 }

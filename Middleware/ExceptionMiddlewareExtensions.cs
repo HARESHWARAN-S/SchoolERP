@@ -27,6 +27,8 @@ namespace SchoolERP.Middleware
                         StudentClassNotFoundException                   => 404,
                         StudentClassAlreadyExistsException              => 409,
                         TeacherAlreadyAssignedAsClassTeacherException   => 409,
+                        AttendanceAlreadyMarkedException                => 409,
+                        InvalidAttendanceStatusException                => 400,
                         _                                               => 500
                     };
 

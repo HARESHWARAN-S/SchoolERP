@@ -16,6 +16,7 @@ namespace SchoolERP.Services
         private readonly ILogRepository _logRepo;
         private readonly INotificationRepository _notificationRepo;
         private readonly IStudentClassRepository _studentClassRepo;
+        private readonly ITeacherAttendanceRepository _teacherAttendanceRepo;
 
         public AdminService(
             IAdminRepository adminRepo,
@@ -24,7 +25,8 @@ namespace SchoolERP.Services
             ILoginRepository loginRepo,
             ILogRepository logRepo,
             INotificationRepository notificationRepo,
-            IStudentClassRepository studentClassRepo)
+            IStudentClassRepository studentClassRepo,
+            ITeacherAttendanceRepository teacherAttendanceRepo)
         {
             _adminRepo = adminRepo;
             _teacherRepo = teacherRepo;
@@ -33,6 +35,7 @@ namespace SchoolERP.Services
             _logRepo = logRepo;
             _notificationRepo = notificationRepo;
             _studentClassRepo = studentClassRepo;
+            _teacherAttendanceRepo = teacherAttendanceRepo;
         }
 
         // ── Admin Setup ───────────────────────────────────────────────────
@@ -196,7 +199,7 @@ namespace SchoolERP.Services
             var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
             if (studentClass == null)
                 throw new StudentClassNotFoundException(dto.Class, dto.Sec);
-                
+
             string admnNo = await _studentRepo.GetNextStudentIdAsync();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
@@ -429,5 +432,68 @@ namespace SchoolERP.Services
                 ClassTeacherName = sc.ClassTeacher?.Name ?? "Unknown"
             }).ToList();
         }
+
+        // ── Teacher Attendance ────────────────────────────────────────────
+
+        public async Task<TeacherAttendanceResponseDto> MarkTeacherAttendanceAsync(MarkTeacherAttendanceDto dto)
+        {
+            // Validate status input
+            if (dto.Status != 0 && dto.Status != 1)
+                throw new InvalidAttendanceStatusException();
+
+            // Check teacher exists
+            var teacher = await _teacherRepo.GetByIdAsync(dto.TeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.TeacherId);
+
+            // Check teacher is active
+            var teacherStatus = await _loginRepo.GetStatusAsync(dto.TeacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.TeacherId);
+
+            // Check attendance not already marked today
+            DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var existing = await _teacherAttendanceRepo.GetAsync(dto.TeacherId, today);
+            if (existing != null)
+                throw new AttendanceAlreadyMarkedException(dto.TeacherId, today);
+
+            // Map 0/1 to enum
+            AttendanceStatus status = dto.Status == 1
+                ? AttendanceStatus.Present
+                : AttendanceStatus.Absent;
+
+            // Save attendance record
+            var attendance = new TeacherAttendance
+            {
+                TeacherId = dto.TeacherId,
+                Date = today,
+                Status = status
+            };
+            await _teacherAttendanceRepo.AddAsync(attendance);
+
+            // Update teacher stats
+            teacher.TotalDays += 1;
+            if (status == AttendanceStatus.Present)
+            {
+                teacher.PresentDays += 1;
+            }
+            teacher.AttendancePercentage = ((decimal)teacher.PresentDays / teacher.TotalDays) * 100;
+            await _teacherRepo.UpdateAsync(teacher);
+
+            await _logRepo.AddAsync(
+                $"Admin marked attendance for teacher '{dto.TeacherId}' as '{status}' on '{today}'");
+
+            return new TeacherAttendanceResponseDto
+            {
+                TeacherId = teacher.TeacherId,
+                TeacherName = teacher.Name,
+                Date = today,
+                Status = status.ToString(),
+                TotalDays = teacher.TotalDays,
+                PresentDays = teacher.PresentDays,
+                AttendancePercentage = teacher.AttendancePercentage
+            };
+        }
+
     }
 }

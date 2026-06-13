@@ -71,4 +71,16 @@ namespace SchoolERP.Exceptions
         public TeacherAlreadyAssignedAsClassTeacherException(string teacherId)
             : base($"Teacher '{teacherId}' is already a class teacher of another class") { }
     }
+
+    public class AttendanceAlreadyMarkedException : Exception
+    {
+        public AttendanceAlreadyMarkedException(string teacherId, DateOnly date)
+            : base($"Attendance for teacher '{teacherId}' on '{date}' is already marked") { }
+    }
+
+    public class InvalidAttendanceStatusException : Exception
+    {
+        public InvalidAttendanceStatusException()
+            : base("Invalid attendance status. Use 0 for Absent and 1 for Present") { }
+    }
 }

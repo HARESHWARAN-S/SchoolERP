@@ -37,4 +37,9 @@ namespace SchoolERP.Models.Enums
         Student,
         Teacher
     }
+    public enum AttendanceStatus
+    {
+        Absent = 0,
+        Present = 1
+    }
 }

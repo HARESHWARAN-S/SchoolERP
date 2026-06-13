@@ -15,6 +15,7 @@ namespace SchoolERP.Contexts
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<StudentClass> StudentClasses { get; set; }
+        public DbSet<TeacherAttendance> TeacherAttendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +23,8 @@ namespace SchoolERP.Contexts
             // Composite Primary Key
             modelBuilder.Entity<StudentClass>()
                 .HasKey(sc => new { sc.Class, sc.Sec });
+            modelBuilder.Entity<TeacherAttendance>()
+                .HasKey(ta => new { ta.TeacherId, ta.Date });
 
             // Decimal Precision
             modelBuilder.Entity<Admin>()
@@ -48,6 +51,8 @@ namespace SchoolERP.Contexts
                 .Property(s => s.Gender).HasConversion<string>();
             modelBuilder.Entity<Student>()
                 .Property(s => s.BloodGrp).HasConversion<string>();
+            modelBuilder.Entity<TeacherAttendance>()
+                .Property(ta => ta.Status).HasConversion<string>();
 
             // Relationships
             modelBuilder.Entity<Admin>()
@@ -74,6 +79,11 @@ namespace SchoolERP.Contexts
             modelBuilder.Entity<StudentClass>()
                 .Property(sc => sc.ClassTeacherId)
                 .IsRequired();
+
+            modelBuilder.Entity<TeacherAttendance>()
+                .HasOne(ta => ta.Teacher)
+                .WithMany()
+                .HasForeignKey(ta => ta.TeacherId);
         }
     }
 }
