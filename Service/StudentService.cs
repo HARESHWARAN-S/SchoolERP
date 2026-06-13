@@ -12,17 +12,20 @@ namespace SchoolERP.Services
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
         private readonly INotificationRepository _notificationRepo;
+        private readonly IStudentClassRepository _studentClassRepo;
 
         public StudentService(
             IStudentRepository studentRepo,
             ILoginRepository loginRepo,
             ILogRepository logRepo,
-            INotificationRepository notificationRepo)
+            INotificationRepository notificationRepo,
+            IStudentClassRepository studentClassRepo)
         {
             _studentRepo = studentRepo;
             _loginRepo = loginRepo;
             _logRepo = logRepo;
             _notificationRepo = notificationRepo;
+            _studentClassRepo = studentClassRepo;
         }
 
         public async Task<StudentResponseDto> GetMyDetailsAsync(string admnNo)
@@ -68,7 +71,7 @@ namespace SchoolERP.Services
                 Timestamp = n.Timestamp
             }).ToList();
         }
-        /*
+        
         public async Task<string> GetMyTimeTableAsync(string admnNo)
         {
             var student = await _studentRepo.GetByIdAsync(admnNo);
@@ -76,7 +79,11 @@ namespace SchoolERP.Services
                 throw new StudentNotFoundException(admnNo);
 
             await _logRepo.AddAsync($"Student '{admnNo}' viewed their timetable");
-            return student.TimeTableUrl;
-        }*/
+            
+            var classes = await _studentClassRepo.GetAsync(student.Class,student.Sec);
+            if (classes == null)
+                throw new StudentClassNotFoundException(student.Class,student.Sec);
+            return classes.ClassTimetable;
+        }
     }
 }
