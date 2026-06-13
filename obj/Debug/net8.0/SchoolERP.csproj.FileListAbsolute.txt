@@ -112,3 +112,4 @@ C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolE
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\ref\SchoolERP.dll
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\Npgsql.dll
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.sourcelink.json

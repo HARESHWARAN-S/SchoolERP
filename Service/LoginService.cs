@@ -6,6 +6,7 @@ using SchoolERP.Repositories.Interfaces;
 using SchoolERP.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using SchoolERP.Models.Entities;
 using System.Text;
 
 namespace SchoolERP.Services
@@ -15,14 +16,17 @@ namespace SchoolERP.Services
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
         private readonly IConfiguration _config;
+        private readonly ITokenBlacklistRepository _blacklistRepo;
 
         public LoginService(
             ILoginRepository loginRepo,
             ILogRepository logRepo,
+            ITokenBlacklistRepository blacklistRepo,
             IConfiguration config)
         {
             _loginRepo = loginRepo;
             _logRepo = logRepo;
+            _blacklistRepo = blacklistRepo;
             _config = config;
         }
 
@@ -92,6 +96,24 @@ namespace SchoolERP.Services
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task LogoutAsync(string username, string token)
+        {
+            var login = await _loginRepo.GetByUsernameAsync(username);
+            if (login == null)
+                throw new UserNotFoundException(username);
+
+            // Add token to blacklist
+            await _blacklistRepo.AddAsync(new BlacklistedToken
+            {
+                Token = token,
+                Username = username,
+                BlacklistedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddHours(8) // same as token expiry
+            });
+
+            await _logRepo.AddAsync($"User '{username}' logged out");
         }
     }
 }

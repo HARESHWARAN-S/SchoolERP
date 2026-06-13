@@ -7,6 +7,7 @@ namespace SchoolERP.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
@@ -16,19 +17,7 @@ namespace SchoolERP.Controllers
             _adminService = adminService;
         }
 
-        // ── No Auth — First time setup only ──────────────────────────────
-
-        [HttpPost("setup")]
-        [AllowAnonymous]
-        public async Task<IActionResult> SetupFirstAdmin([FromBody] CreateFirstAdminDto dto)
-        {
-            var result = await _adminService.SetupFirstAdminAsync(dto);
-            return Ok(result);
-        }
-
         // ── Requires Admin JWT ────────────────────────────────────────────
-
-        [Authorize(Roles = "Admin")]
 
         [HttpPost("add-admin")]
         public async Task<IActionResult> AddAdmin([FromBody] CreateAdminDto dto)

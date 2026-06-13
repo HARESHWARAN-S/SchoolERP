@@ -21,10 +21,12 @@ builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
+builder.Services.AddScoped<ITokenBlacklistRepository, TokenBlacklistRepository>();
 
 // Services
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -79,6 +81,7 @@ var app = builder.Build();
 
 // Global Exception Handler
 app.UseGlobalExceptionHandler();
+app.UseMiddleware<TokenBlacklistMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

@@ -6,5 +6,6 @@ namespace SchoolERP.Services.Interfaces
     {
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
         Task ChangePasswordAsync(ChangePasswordDto dto);
+        Task LogoutAsync(string username, string token); 
     }
 }
