@@ -14,19 +14,22 @@ namespace SchoolERP.Services
         private readonly IStudentRepository _studentRepo;
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
+        private readonly INotificationRepository _notificationRepo;
 
         public AdminService(
             IAdminRepository adminRepo,
             ITeacherRepository teacherRepo,
             IStudentRepository studentRepo,
             ILoginRepository loginRepo,
-            ILogRepository logRepo)
+            ILogRepository logRepo,
+            INotificationRepository notificationRepo)
         {
             _adminRepo = adminRepo;
             _teacherRepo = teacherRepo;
             _studentRepo = studentRepo;
             _loginRepo = loginRepo;
             _logRepo = logRepo;
+            _notificationRepo = notificationRepo;
         }
 
         // ── Admin Setup ───────────────────────────────────────────────────
@@ -259,6 +262,43 @@ namespace SchoolERP.Services
                 Name = s.Name,
                 Class = s.Class,
                 Sec = s.Sec
+            }).ToList();
+        }
+
+        public async Task<NotificationResponseDto> AddNotificationAsync(CreateNotificationDto dto)
+        {
+            var notification = new Notification
+            {
+                Target = dto.Target,
+                Title = dto.Title,
+                Message = dto.Message,
+                Timestamp = DateTime.UtcNow
+            };
+
+            await _notificationRepo.AddAsync(notification);
+            await _logRepo.AddAsync($"Admin added notification '{dto.Title}' for target '{dto.Target}'");
+
+            return new NotificationResponseDto
+            {
+                NotificationId = notification.NotificationId,
+                Target = notification.Target,
+                Title = notification.Title,
+                Message = notification.Message,
+                Timestamp = notification.Timestamp
+            };
+        }
+
+        public async Task<List<NotificationResponseDto>> GetAllNotificationsAsync()
+        {
+            var notifications = await _notificationRepo.GetAllAsync();
+
+            return notifications.Select(n => new NotificationResponseDto
+            {
+                NotificationId = n.NotificationId,
+                Target = n.Target,
+                Title = n.Title,
+                Message = n.Message,
+                Timestamp = n.Timestamp
             }).ToList();
         }
 

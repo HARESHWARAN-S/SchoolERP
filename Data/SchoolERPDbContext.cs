@@ -13,6 +13,7 @@ namespace SchoolERP.Contexts
         public DbSet<Student> Students { get; set; }
         public DbSet<Log> Logs { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

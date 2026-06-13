@@ -36,6 +36,12 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
+        [HttpGet("view-notifications")]
+        public async Task<IActionResult> GetMyNotifications()
+        {
+            var result = await _teacherService.GetMyNotificationsAsync();
+            return Ok(result);
+        }
         
     }
 }

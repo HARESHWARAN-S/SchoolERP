@@ -5,5 +5,6 @@ namespace SchoolERP.Services.Interfaces
     public interface ITeacherService
     {
         Task<TeacherResponseDto> GetMyDetailsAsync(string teacherId);
+        Task<List<NotificationResponseDto>> GetMyNotificationsAsync();
     }
 }

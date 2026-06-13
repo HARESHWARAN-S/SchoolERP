@@ -81,5 +81,20 @@ namespace SchoolERP.Controllers
             var result = await _adminService.GetAllStudentsAsync();
             return Ok(result);
         }
+        // Add Notification
+        [HttpPost("send-notification")]
+        public async Task<IActionResult> AddNotification([FromBody] CreateNotificationDto dto)
+        {
+            var result = await _adminService.AddNotificationAsync(dto);
+            return Ok(result);
+        }
+
+        // View All Notifications
+        [HttpGet("view-notifications")]
+        public async Task<IActionResult> GetAllNotifications()
+        {
+            var result = await _adminService.GetAllNotificationsAsync();
+            return Ok(result);
+        }
     }
 }

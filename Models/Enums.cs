@@ -31,4 +31,10 @@ namespace SchoolERP.Models.Enums
         OPositive, 
         ONegative
     }
+    public enum NotificationTarget
+    {
+        All,
+        Student,
+        Teacher
+    }
 }

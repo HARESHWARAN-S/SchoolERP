@@ -2,6 +2,7 @@ using SchoolERP.Exceptions;
 using SchoolERP.Models.DTOs;
 using SchoolERP.Repositories.Interfaces;
 using SchoolERP.Services.Interfaces;
+using SchoolERP.Models.Enums;
 
 namespace SchoolERP.Services
 {
@@ -10,15 +11,18 @@ namespace SchoolERP.Services
         private readonly ITeacherRepository _teacherRepo;
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
+        private readonly INotificationRepository _notificationRepo;
 
         public TeacherService(
             ITeacherRepository teacherRepo,
             ILoginRepository loginRepo,
-            ILogRepository logRepo)
+            ILogRepository logRepo,
+            INotificationRepository notificationRepo)
         {
             _teacherRepo = teacherRepo;
             _loginRepo = loginRepo;
             _logRepo = logRepo;
+            _notificationRepo = notificationRepo;
         }
 
         public async Task<TeacherResponseDto> GetMyDetailsAsync(string teacherId)
@@ -43,6 +47,20 @@ namespace SchoolERP.Services
                 PresentDays = teacher.PresentDays,
                 AttendancePercentage = teacher.AttendancePercentage
             };
+        }
+
+        public async Task<List<NotificationResponseDto>> GetMyNotificationsAsync()
+        {
+            var notifications = await _notificationRepo.GetByTargetAsync(NotificationTarget.Teacher);
+
+            return notifications.Select(n => new NotificationResponseDto
+            {
+                NotificationId = n.NotificationId,
+                Target = n.Target,
+                Title = n.Title,
+                Message = n.Message,
+                Timestamp = n.Timestamp
+            }).ToList();
         }
     }
 }
