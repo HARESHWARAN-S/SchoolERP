@@ -12,17 +12,19 @@ namespace SchoolERP.Services
         private readonly ILoginRepository _loginRepo;
         private readonly ILogRepository _logRepo;
         private readonly INotificationRepository _notificationRepo;
-
+        private readonly ITeacherAttendanceRepository _teacherAttendanceRepo;
         public TeacherService(
             ITeacherRepository teacherRepo,
             ILoginRepository loginRepo,
             ILogRepository logRepo,
-            INotificationRepository notificationRepo)
+            INotificationRepository notificationRepo,
+            ITeacherAttendanceRepository teacherAttendanceRepo)
         {
             _teacherRepo = teacherRepo;
             _loginRepo = loginRepo;
             _logRepo = logRepo;
             _notificationRepo = notificationRepo;
+            _teacherAttendanceRepo = teacherAttendanceRepo;
         }
 
         public async Task<TeacherResponseDto> GetMyDetailsAsync(string teacherId)
@@ -54,6 +56,9 @@ namespace SchoolERP.Services
             var teacher = await _teacherRepo.GetByIdAsync(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
+            var user = await _loginRepo.GetByUsernameAsync(teacherId);
+            if (user.Status == UserStatus.Active)
+                throw new UserInactiveException(teacherId);
 
             await _logRepo.AddAsync($"Teacher '{teacherId}' viewed their timetable");
             return teacher.TimeTableUrl;
@@ -71,6 +76,25 @@ namespace SchoolERP.Services
                 Message = n.Message,
                 Timestamp = n.Timestamp
             }).ToList();
+        }
+
+        public async Task<List<TeacherLeaveDetailsDto>> GetMyLeaveDetailsAsync(string teacherId)
+        {
+            var teacher = await _teacherRepo.GetByIdAsync(teacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(teacherId);
+
+            var user = await _loginRepo.GetByUsernameAsync(teacherId);
+            if (user.Status == UserStatus.Inactive)
+                throw new UserInactiveException(teacherId);
+
+            List<DateOnly> leaveDates = await _teacherAttendanceRepo.GetLeaveDatesAsync(teacherId);
+
+            return leaveDates.Select(date => new TeacherLeaveDetailsDto
+            {
+                Date = date
+            }).ToList();
+            
         }
     }
 }

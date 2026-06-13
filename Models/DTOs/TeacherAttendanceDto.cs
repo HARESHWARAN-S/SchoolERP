@@ -16,4 +16,8 @@ namespace SchoolERP.Models.DTOs
         public int PresentDays { get; set; }
         public decimal AttendancePercentage { get; set; }
     }
+    public class TeacherLeaveDetailsDto
+    {
+        public DateOnly Date {get; set;}
+    }
 }

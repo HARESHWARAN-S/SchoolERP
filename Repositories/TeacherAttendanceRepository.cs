@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolERP.Contexts;
 using SchoolERP.Models.Entities;
 using SchoolERP.Repositories.Interfaces;
+using SchoolERP.Models.Enums;
 
 namespace SchoolERP.Repositories
 {
@@ -18,6 +19,14 @@ namespace SchoolERP.Repositories
         {
             return await _context.TeacherAttendances
                 .FirstOrDefaultAsync(ta => ta.TeacherId == teacherId && ta.Date == date);
+        }
+
+        public async Task<List<DateOnly>> GetLeaveDatesAsync(string teacherId)
+        {
+            return await _context.TeacherAttendances
+                .Where(ta => ta.TeacherId == teacherId && ta.Status == AttendanceStatus.Absent)
+                .Select(ta => ta.Date) 
+                .ToListAsync(); 
         }
 
         public async Task AddAsync(TeacherAttendance attendance)

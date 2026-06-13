@@ -6,5 +6,6 @@ namespace SchoolERP.Repositories.Interfaces
     {
         Task<TeacherAttendance?> GetAsync(string teacherId, DateOnly date);
         Task AddAsync(TeacherAttendance attendance);
+        Task<List<DateOnly>> GetLeaveDatesAsync(string teacherId);
     }
 }

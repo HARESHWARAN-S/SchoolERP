@@ -51,5 +51,12 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
         
+        [HttpGet("view-leaveDetails")]
+        public async Task<IActionResult> GetMyLeaveDetails()
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.GetMyLeaveDetailsAsync(teacherId);
+            return Ok(result);
+        }
     }
 }
