@@ -17,6 +17,7 @@ namespace SchoolERP.Services
         private readonly INotificationRepository _notificationRepo;
         private readonly IStudentClassRepository _studentClassRepo;
         private readonly ITeacherAttendanceRepository _teacherAttendanceRepo;
+        private readonly ISubjectRepository _subjectRepo;
 
         public AdminService(
             IAdminRepository adminRepo,
@@ -26,7 +27,8 @@ namespace SchoolERP.Services
             ILogRepository logRepo,
             INotificationRepository notificationRepo,
             IStudentClassRepository studentClassRepo,
-            ITeacherAttendanceRepository teacherAttendanceRepo)
+            ITeacherAttendanceRepository teacherAttendanceRepo,
+            ISubjectRepository subjectRepo)
         {
             _adminRepo = adminRepo;
             _teacherRepo = teacherRepo;
@@ -36,6 +38,7 @@ namespace SchoolERP.Services
             _notificationRepo = notificationRepo;
             _studentClassRepo = studentClassRepo;
             _teacherAttendanceRepo = teacherAttendanceRepo;
+            _subjectRepo = subjectRepo;
         }
 
         // ── Admin Setup ───────────────────────────────────────────────────
@@ -246,6 +249,7 @@ namespace SchoolERP.Services
                 throw new UserNotFoundException(admnNo);
 
             login.Status = UserStatus.Inactive;
+            student.RollNo = -1;
             await _loginRepo.UpdateAsync(login);
 
             await _logRepo.AddAsync($"Admin removed student '{admnNo}' (soft delete)");
@@ -372,20 +376,27 @@ namespace SchoolERP.Services
             if (existing != null)
                 throw new StudentClassAlreadyExistsException(dto.Class, dto.Sec);
 
-            // Check teacher exists and is active
+            // Check teacher exists
             var teacher = await _teacherRepo.GetByIdAsync(dto.ClassTeacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(dto.ClassTeacherId);
 
+            // Check teacher is active
             var teacherStatus = await _loginRepo.GetStatusAsync(dto.ClassTeacherId);
             if (teacherStatus == UserStatus.Inactive)
                 throw new UserInactiveException(dto.ClassTeacherId);
 
-            // Check teacher not already assigned as class teacher
+            // Check teacher not already assigned as class teacher of another class
             var alreadyAssigned = await _studentClassRepo.GetByTeacherIdAsync(dto.ClassTeacherId);
             if (alreadyAssigned != null)
                 throw new TeacherAlreadyAssignedAsClassTeacherException(dto.ClassTeacherId);
 
+            // Check subject not already taken by another teacher for same class
+            // (not needed here since class doesn't exist yet, but check subject name is not empty)
+            if (string.IsNullOrWhiteSpace(dto.SubjectName))
+                throw new ArgumentException("Subject name cannot be empty");
+
+            // Create StudentClass record
             var studentClass = new StudentClass
             {
                 Class = dto.Class,
@@ -393,9 +404,20 @@ namespace SchoolERP.Services
                 ClassTimetable = dto.ClassTimetable,
                 ClassTeacherId = dto.ClassTeacherId
             };
-
             await _studentClassRepo.AddAsync(studentClass);
-            await _logRepo.AddAsync($"Admin added class '{dto.Class}-{dto.Sec}' with class teacher '{dto.ClassTeacherId}'");
+
+            // Create Subject record for class teacher's subject
+            var subject = new Subject
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                SubjectName = dto.SubjectName,
+                TeacherId = dto.ClassTeacherId
+            };
+            await _subjectRepo.AddAsync(subject);
+
+            await _logRepo.AddAsync(
+                $"Admin added class '{dto.Class}-{dto.Sec}' with class teacher '{dto.ClassTeacherId}' handling subject '{dto.SubjectName}'");
 
             return new StudentClassResponseDto
             {
@@ -403,7 +425,8 @@ namespace SchoolERP.Services
                 Sec = studentClass.Sec,
                 ClassTimetable = studentClass.ClassTimetable,
                 ClassTeacherId = studentClass.ClassTeacherId,
-                ClassTeacherName = teacher.Name
+                ClassTeacherName = teacher.Name,
+                SubjectName = dto.SubjectName
             };
         }
         /*
@@ -495,5 +518,118 @@ namespace SchoolERP.Services
             };
         }
 
+        // ── Subject ───────────────────────────────────────────────────────
+
+        public async Task<SubjectResponseDto> AddSubjectAsync(CreateSubjectDto dto)
+        {
+            // Check class exists
+            var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+
+            // Check teacher exists
+            var teacher = await _teacherRepo.GetByIdAsync(dto.TeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.TeacherId);
+
+            // Check teacher is active
+            var teacherStatus = await _loginRepo.GetStatusAsync(dto.TeacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.TeacherId);
+
+            // Check subject already exists for this class
+            var existing = await _subjectRepo.GetAsync(dto.Class, dto.Sec, dto.SubjectName);
+            if (existing != null)
+                throw new SubjectAlreadyExistsException(dto.Class, dto.Sec, dto.SubjectName);
+
+            var subject = new Subject
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                SubjectName = dto.SubjectName,
+                TeacherId = dto.TeacherId
+            };
+
+            await _subjectRepo.AddAsync(subject);
+            await _logRepo.AddAsync(
+                $"Admin added subject '{dto.SubjectName}' for class '{dto.Class}-{dto.Sec}' with teacher '{dto.TeacherId}'");
+
+            return new SubjectResponseDto
+            {
+                Class = subject.Class,
+                Sec = subject.Sec,
+                SubjectName = subject.SubjectName,
+                TeacherId = subject.TeacherId,
+                TeacherName = teacher.Name
+            };
+        }
+
+        public async Task<List<SubjectResponseDto>> GetAllSubjectsAsync()
+        {
+            var subjects = await _subjectRepo.GetAllAsync();
+
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = s.Class,
+                Sec = s.Sec,
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
+            }).ToList();
+        }
+
+        public async Task<List<SubjectResponseDto>> GetSubjectsByClassAsync(string Class, string sec)
+        {
+            // Check class exists
+            var studentClass = await _studentClassRepo.GetAsync(Class, sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(Class, sec);
+
+            var subjects = await _subjectRepo.GetByClassAsync(Class, sec);
+
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = s.Class,
+                Sec = s.Sec,
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
+            }).ToList();
+        }
+
+        public async Task<bool> AssignRollNumbersAsync(string Class, string sec)
+        {
+            // Check class exists
+            var studentClass = await _studentClassRepo.GetAsync(Class, sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(Class, sec);
+
+            // Get all active students in this class (rollNo != -1)
+            var students = await _studentRepo.GetByClassAsync(Class, sec);
+
+            if (!students.Any())
+            {
+                throw new Exception($"No active students found in class '{Class}-{sec}'");
+            }
+
+            // Sort by name ascending and assign roll numbers from 1
+            var sortedStudents = students
+                .OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            int rollNo = 1;
+            foreach (var student in sortedStudents)
+            {
+                student.RollNo = rollNo;
+                rollNo++;
+            }
+
+            await _studentRepo.UpdateRangeAsync(sortedStudents);
+
+            await _logRepo.AddAsync(
+                $"Admin assigned roll numbers for class '{Class}-{sec}' to {sortedStudents.Count} students");
+
+            return true;
+        }
     }
 }

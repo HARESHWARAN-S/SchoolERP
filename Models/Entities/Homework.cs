@@ -1,0 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SchoolERP.Models.Entities
+{
+    public class Homework
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int HomeworkId { get; set; }
+        public string Class { get; set; } = string.Empty;
+        public string Sec { get; set; } = string.Empty;
+        public DateOnly Date { get; set; }
+        public string Subject { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+
+        // Navigation
+        public StudentClass? StudentClass { get; set; }
+    }
+}

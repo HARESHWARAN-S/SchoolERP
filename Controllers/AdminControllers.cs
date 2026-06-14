@@ -122,6 +122,16 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
+        // Assign Roll Numbers
+        [HttpPut("assign-rollnumbers")]
+        public async Task<IActionResult> AssignRollNumbers(
+            [FromQuery] string className,
+            [FromQuery] string sec)
+        {
+            await _adminService.AssignRollNumbersAsync(className, sec);
+            return Ok($"Roll numbers assigned successfully for class '{className}-{sec}'");
+        }
+
         // Mark Teacher Attendance
         [HttpPost("mark-teacher-attendance")]
         public async Task<IActionResult> MarkTeacherAttendance([FromBody] MarkTeacherAttendanceDto dto)
@@ -129,5 +139,31 @@ namespace SchoolERP.Controllers
             var result = await _adminService.MarkTeacherAttendanceAsync(dto);
             return Ok(result);
         }
+
+        // Add Subject
+        [HttpPost("add-subject")]
+        public async Task<IActionResult> AddSubject([FromBody] CreateSubjectDto dto)
+        {
+            var result = await _adminService.AddSubjectAsync(dto);
+            return Ok(result);
+        }
+
+        // Get All Subjects
+        [HttpGet("subjects")]
+        public async Task<IActionResult> GetAllSubjects()
+        {
+            var result = await _adminService.GetAllSubjectsAsync();
+            return Ok(result);
+        }
+
+        // Get Subjects by Class
+        [HttpGet("subjects/{className}/{sec}")]
+        public async Task<IActionResult> GetSubjectsByClass(string className, string sec)
+        {
+            var result = await _adminService.GetSubjectsByClassAsync(className, sec);
+            return Ok(result);
+        }
+
+
     }
 }

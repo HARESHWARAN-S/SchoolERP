@@ -29,6 +29,10 @@ namespace SchoolERP.Middleware
                         TeacherAlreadyAssignedAsClassTeacherException   => 409,
                         AttendanceAlreadyMarkedException                => 409,
                         InvalidAttendanceStatusException                => 400,
+                        SubjectAlreadyExistsException                   => 409,
+                        SubjectNotFoundException                        => 404,
+                        HomeworkAlreadyExistsException                  => 409,
+                        UnauthorizedSubjectAccessException              => 403,
                         _                                               => 500
                     };
 

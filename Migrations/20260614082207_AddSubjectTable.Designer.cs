@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SchoolERP.Contexts;
@@ -11,9 +12,11 @@ using SchoolERP.Contexts;
 namespace SchoolERP.Migrations
 {
     [DbContext(typeof(SchoolERPDbContext))]
-    partial class SchoolERPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260614082207_AddSubjectTable")]
+    partial class AddSubjectTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,46 +86,6 @@ namespace SchoolERP.Migrations
                     b.HasKey("Token");
 
                     b.ToTable("BlacklistedTokens");
-                });
-
-            modelBuilder.Entity("SchoolERP.Models.Entities.Homework", b =>
-                {
-                    b.Property<int>("HomeworkId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HomeworkId"));
-
-                    b.Property<string>("Class")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Sec")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("StudentClassClass")
-                        .HasColumnType("text");
-
-                    b.Property<string>("StudentClassSec")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("HomeworkId");
-
-                    b.HasIndex("StudentClassClass", "StudentClassSec");
-
-                    b.ToTable("Homeworks");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Log", b =>
@@ -379,15 +342,6 @@ namespace SchoolERP.Migrations
                         .IsRequired();
 
                     b.Navigation("Login");
-                });
-
-            modelBuilder.Entity("SchoolERP.Models.Entities.Homework", b =>
-                {
-                    b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
-                        .WithMany()
-                        .HasForeignKey("StudentClassClass", "StudentClassSec");
-
-                    b.Navigation("StudentClass");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Student", b =>

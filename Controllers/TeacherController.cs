@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolERP.Services.Interfaces;
 using System.Security.Claims;
+using SchoolERP.Models.DTOs;
 
 namespace SchoolERP.Controllers
 {
@@ -56,6 +57,14 @@ namespace SchoolERP.Controllers
         {
             string teacherId = GetCurrentUserId();
             var result = await _teacherService.GetMyLeaveDetailsAsync(teacherId);
+            return Ok(result);
+        }
+
+        [HttpPost("add-homework")]
+        public async Task<IActionResult> AddHomework([FromBody] CreateHomeworkDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.AddHomeworkAsync(teacherId, dto);
             return Ok(result);
         }
     }

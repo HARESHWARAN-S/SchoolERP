@@ -1,5 +1,6 @@
 using SchoolERP.Exceptions;
 using SchoolERP.Models.DTOs;
+using SchoolERP.Models.Entities;
 using SchoolERP.Repositories.Interfaces;
 using SchoolERP.Services.Interfaces;
 using SchoolERP.Models.Enums;
@@ -13,18 +14,27 @@ namespace SchoolERP.Services
         private readonly ILogRepository _logRepo;
         private readonly INotificationRepository _notificationRepo;
         private readonly ITeacherAttendanceRepository _teacherAttendanceRepo;
+        private readonly IHomeworkRepository _homeworkRepo;   
+        private readonly ISubjectRepository _subjectRepo;     
+        private readonly IStudentRepository _studentRepo; 
         public TeacherService(
             ITeacherRepository teacherRepo,
             ILoginRepository loginRepo,
             ILogRepository logRepo,
             INotificationRepository notificationRepo,
-            ITeacherAttendanceRepository teacherAttendanceRepo)
+            ITeacherAttendanceRepository teacherAttendanceRepo,
+            IHomeworkRepository homeworkRepo,       
+            ISubjectRepository subjectRepo,         
+            IStudentRepository studentRepo) 
         {
             _teacherRepo = teacherRepo;
             _loginRepo = loginRepo;
             _logRepo = logRepo;
             _notificationRepo = notificationRepo;
             _teacherAttendanceRepo = teacherAttendanceRepo;
+            _homeworkRepo = homeworkRepo;          
+            _subjectRepo = subjectRepo;            
+            _studentRepo = studentRepo; 
         }
 
         public async Task<TeacherResponseDto> GetMyDetailsAsync(string teacherId)
@@ -95,6 +105,54 @@ namespace SchoolERP.Services
                 Date = date
             }).ToList();
             
+        }
+
+        public async Task<HomeworkResponseDto> AddHomeworkAsync(string teacherId, CreateHomeworkDto dto)
+        {
+            // Check teacher exists
+            var teacher = await _teacherRepo.GetByIdAsync(teacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(teacherId);
+
+            // Check teacher is active
+            var teacherStatus = await _loginRepo.GetStatusAsync(teacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(teacherId);
+
+            // Check teacher is assigned to this subject for this class
+            var subject = await _subjectRepo.GetByClassSecSubjectTeacherAsync(
+                dto.Class, dto.Sec, dto.Subject, teacherId);
+            if (subject == null)
+                throw new UnauthorizedSubjectAccessException(teacherId, dto.Subject, dto.Class, dto.Sec);
+
+            // Check homework not already given today for same subject
+            DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var existing = await _homeworkRepo.GetAsync(dto.Class, dto.Sec, dto.Subject, today);
+            if (existing != null)
+                throw new HomeworkAlreadyExistsException(dto.Class, dto.Sec, dto.Subject, today);
+
+            var homework = new Homework
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                Date = today,
+                Subject = dto.Subject,
+                Description = dto.Description
+            };
+
+            await _homeworkRepo.AddAsync(homework);
+            await _logRepo.AddAsync(
+                $"Teacher '{teacherId}' added homework for subject '{dto.Subject}' in class '{dto.Class}-{dto.Sec}'");
+
+            return new HomeworkResponseDto
+            {
+                HomeworkId = homework.HomeworkId,
+                Class = homework.Class,
+                Sec = homework.Sec,
+                Date = homework.Date,
+                Subject = homework.Subject,
+                Description = homework.Description
+            };
         }
     }
 }

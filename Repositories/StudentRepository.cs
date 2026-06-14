@@ -43,5 +43,18 @@ namespace SchoolERP.Repositories
             _context.Students.Update(student);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Student>> GetByClassAsync(string Class, string sec)
+        {
+            return await _context.Students
+                .Where(s => s.Class == Class && s.Sec == sec && s.RollNo != -1)
+                .ToListAsync();
+        }
+
+        public async Task UpdateRangeAsync(List<Student> students)
+        {
+            _context.Students.UpdateRange(students);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -50,5 +50,12 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
         
+        [HttpGet("homework")]
+        public async Task<IActionResult> GetHomework()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetHomeworkAsync(admnNo);
+            return Ok(result);
+        }
     }
 }

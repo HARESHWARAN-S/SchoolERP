@@ -83,4 +83,26 @@ namespace SchoolERP.Exceptions
         public InvalidAttendanceStatusException()
             : base("Invalid attendance status. Use 0 for Absent and 1 for Present") { }
     }
+        public class SubjectAlreadyExistsException : Exception
+    {
+        public SubjectAlreadyExistsException(string Class, string sec, string subject)
+            : base($"Subject '{subject}' already exists for class '{Class}-{sec}'") { }
+    }
+
+    public class SubjectNotFoundException : Exception
+    {
+        public SubjectNotFoundException(string Class, string sec, string subject)
+            : base($"Subject '{subject}' not found for class '{Class}-{sec}'") { }
+    }
+        public class HomeworkAlreadyExistsException : Exception
+    {
+        public HomeworkAlreadyExistsException(string Class, string sec, string subject, DateOnly date)
+            : base($"Homework for subject '{subject}' in class '{Class}-{sec}' on '{date}' already exists") { }
+    }
+
+    public class UnauthorizedSubjectAccessException : Exception
+    {
+        public UnauthorizedSubjectAccessException(string teacherId, string subject, string Class, string sec)
+            : base($"Teacher '{teacherId}' is not assigned to subject '{subject}' for class '{Class}-{sec}'") { }
+    }
 }

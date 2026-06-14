@@ -50,5 +50,6 @@ namespace SchoolERP.Repositories
             _context.Admins.Update(admin);
             await _context.SaveChangesAsync();
         }
+
     }
 }

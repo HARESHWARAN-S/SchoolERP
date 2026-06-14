@@ -16,6 +16,8 @@ namespace SchoolERP.Contexts
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<StudentClass> StudentClasses { get; set; }
         public DbSet<TeacherAttendance> TeacherAttendances { get; set; }
+        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Homework> Homeworks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +27,8 @@ namespace SchoolERP.Contexts
                 .HasKey(sc => new { sc.Class, sc.Sec });
             modelBuilder.Entity<TeacherAttendance>()
                 .HasKey(ta => new { ta.TeacherId, ta.Date });
+            modelBuilder.Entity<Subject>()
+                .HasKey(s => new { s.Class, s.Sec, s.SubjectName });
 
             // Decimal Precision
             modelBuilder.Entity<Admin>()
@@ -84,6 +88,23 @@ namespace SchoolERP.Contexts
                 .HasOne(ta => ta.Teacher)
                 .WithMany()
                 .HasForeignKey(ta => ta.TeacherId);
+            
+            // Subject -> StudentClass
+            modelBuilder.Entity<Subject>()
+                .HasOne(s => s.StudentClass)
+                .WithMany()
+                .HasForeignKey(s => new { s.Class, s.Sec });
+
+            // Subject -> Teacher
+            modelBuilder.Entity<Subject>()
+                .HasOne(s => s.Teacher)
+                .WithMany()
+                .HasForeignKey(s => s.TeacherId);
+
+            modelBuilder.Entity<Homework>()
+            .HasOne(h => h.StudentClass)
+            .WithMany()
+            .HasForeignKey(h => new { h.Class, h.Sec });
         }
     }
 }

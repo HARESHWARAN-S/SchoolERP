@@ -25,6 +25,8 @@ builder.Services.AddScoped<ITokenBlacklistRepository, TokenBlacklistRepository>(
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IStudentClassRepository, StudentClassRepository>();
 builder.Services.AddScoped<ITeacherAttendanceRepository, TeacherAttendanceRepository>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IHomeworkRepository, HomeworkRepository>();
 
 // Services
 builder.Services.AddScoped<ILoginService, LoginService>();
