@@ -18,6 +18,8 @@ namespace SchoolERP.Contexts
         public DbSet<TeacherAttendance> TeacherAttendances { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Homework> Homeworks { get; set; }
+        public DbSet<Fee> Fees { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +39,12 @@ namespace SchoolERP.Contexts
                 .Property(t => t.AttendancePercentage).HasPrecision(5, 2);
             modelBuilder.Entity<Student>()
                 .Property(s => s.AttendancePercentage).HasPrecision(5, 2);
+            modelBuilder.Entity<Fee>()
+                .Property(f => f.Amount).HasPrecision(10, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount).HasPrecision(10, 2);
+
 
             // Enums as strings
             modelBuilder.Entity<Login>()
@@ -57,6 +65,8 @@ namespace SchoolERP.Contexts
                 .Property(s => s.BloodGrp).HasConversion<string>();
             modelBuilder.Entity<TeacherAttendance>()
                 .Property(ta => ta.Status).HasConversion<string>();
+            modelBuilder.Entity<Fee>()
+                .Property(f => f.Status).HasConversion<string>();
 
             // Relationships
             modelBuilder.Entity<Admin>()
@@ -78,6 +88,24 @@ namespace SchoolERP.Contexts
                 .HasOne(sc => sc.ClassTeacher)
                 .WithOne()
                 .HasForeignKey<StudentClass>(sc => sc.ClassTeacherId);
+            
+            // Fee -> Student
+            modelBuilder.Entity<Fee>()
+                .HasOne(f => f.Student)
+                .WithMany()
+                .HasForeignKey(f => f.AdmnNo);
+
+            // Payment -> Fee
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Fee)
+                .WithMany()
+                .HasForeignKey(p => p.FeeId);
+
+            // Payment -> Student
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Student)
+                .WithMany()
+                .HasForeignKey(p => p.AdmnNo);
 
             // Enum conversions if needed
             modelBuilder.Entity<StudentClass>()

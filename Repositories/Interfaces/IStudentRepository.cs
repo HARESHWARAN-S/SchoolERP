@@ -11,5 +11,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task UpdateAsync(Student student);
         Task<List<Student>> GetByClassAsync(string Class, string sec);
         Task UpdateRangeAsync(List<Student> students);
+        Task<List<Student>> GetAllByClassAsync(string Class);
     }
 }

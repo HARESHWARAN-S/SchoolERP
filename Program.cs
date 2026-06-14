@@ -27,6 +27,9 @@ builder.Services.AddScoped<IStudentClassRepository, StudentClassRepository>();
 builder.Services.AddScoped<ITeacherAttendanceRepository, TeacherAttendanceRepository>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 builder.Services.AddScoped<IHomeworkRepository, HomeworkRepository>();
+builder.Services.AddScoped<IFeeRepository, FeeRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 
 // Services
 builder.Services.AddScoped<ILoginService, LoginService>();

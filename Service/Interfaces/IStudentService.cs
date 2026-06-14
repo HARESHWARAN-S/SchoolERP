@@ -8,5 +8,8 @@ namespace SchoolERP.Services.Interfaces
         Task<List<NotificationResponseDto>> GetMyNotificationsAsync();
         Task<string> GetMyTimeTableAsync(string admnNo);
         Task<List<StudentHomeworkResponseDto>> GetHomeworkAsync(string admnNo);
+        Task<PayFeeResponseDto> PayFeeAsync(string admnNo, int feeId);
+        Task<List<PaymentHistoryResponseDto>> GetPaymentHistoryAsync(string admnNo);
+        Task<List<FeeDueResponseDto>> GetFeeDueAsync(string admnNo);
     }
 }

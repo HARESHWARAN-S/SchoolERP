@@ -33,6 +33,11 @@ namespace SchoolERP.Middleware
                         SubjectNotFoundException                        => 404,
                         HomeworkAlreadyExistsException                  => 409,
                         UnauthorizedSubjectAccessException              => 403,
+                        FeeNotFoundException                            => 404,
+                        FeeAlreadyPaidException                         => 409,
+                        InvalidDueDateException                         => 400,
+                        NoStudentsInClassException                      => 404,
+                        FeeNotBelongToStudentException                  => 403,
                         _                                               => 500
                     };
 

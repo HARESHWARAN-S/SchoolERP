@@ -105,4 +105,34 @@ namespace SchoolERP.Exceptions
         public UnauthorizedSubjectAccessException(string teacherId, string subject, string Class, string sec)
             : base($"Teacher '{teacherId}' is not assigned to subject '{subject}' for class '{Class}-{sec}'") { }
     }
+
+        public class FeeNotFoundException : Exception
+    {
+        public FeeNotFoundException(int feeId)
+            : base($"Fee with ID '{feeId}' not found") { }
+    }
+
+    public class FeeAlreadyPaidException : Exception
+    {
+        public FeeAlreadyPaidException(int feeId)
+            : base($"Fee with ID '{feeId}' is already paid") { }
+    }
+
+    public class InvalidDueDateException : Exception
+    {
+        public InvalidDueDateException()
+            : base("Due date cannot be in the past") { }
+    }
+
+    public class NoStudentsInClassException : Exception
+    {
+        public NoStudentsInClassException(string Class)
+            : base($"No active students found in class '{Class}'") { }
+    }
+
+    public class FeeNotBelongToStudentException : Exception
+    {
+        public FeeNotBelongToStudentException(int feeId, string admnNo)
+            : base($"Fee '{feeId}' does not belong to student '{admnNo}'") { }
+    }
 }

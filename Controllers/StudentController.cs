@@ -57,5 +57,32 @@ namespace SchoolERP.Controllers
             var result = await _studentService.GetHomeworkAsync(admnNo);
             return Ok(result);
         }
+
+        // Pay Fee
+        [HttpPost("pay-fee/{feeId}")]
+        public async Task<IActionResult> PayFee(int feeId)
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.PayFeeAsync(admnNo, feeId);
+            return Ok(result);
+        }
+
+        // Fee Due
+        [HttpGet("fee-due")]
+        public async Task<IActionResult> GetFeeDue()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetFeeDueAsync(admnNo);
+            return Ok(result);
+        }
+
+        // Payment History
+        [HttpGet("payment-history")]
+        public async Task<IActionResult> GetPaymentHistory()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetPaymentHistoryAsync(admnNo);
+            return Ok(result);
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace SchoolERP.Services
         private readonly IStudentClassRepository _studentClassRepo;
         private readonly ITeacherAttendanceRepository _teacherAttendanceRepo;
         private readonly ISubjectRepository _subjectRepo;
+        private readonly IFeeRepository _feeRepo;       
 
         public AdminService(
             IAdminRepository adminRepo,
@@ -28,7 +29,8 @@ namespace SchoolERP.Services
             INotificationRepository notificationRepo,
             IStudentClassRepository studentClassRepo,
             ITeacherAttendanceRepository teacherAttendanceRepo,
-            ISubjectRepository subjectRepo)
+            ISubjectRepository subjectRepo,
+            IFeeRepository feeRepo)
         {
             _adminRepo = adminRepo;
             _teacherRepo = teacherRepo;
@@ -39,6 +41,7 @@ namespace SchoolERP.Services
             _studentClassRepo = studentClassRepo;
             _teacherAttendanceRepo = teacherAttendanceRepo;
             _subjectRepo = subjectRepo;
+            _feeRepo = feeRepo;
         }
 
         // ── Admin Setup ───────────────────────────────────────────────────
@@ -630,6 +633,44 @@ namespace SchoolERP.Services
                 $"Admin assigned roll numbers for class '{Class}-{sec}' to {sortedStudents.Count} students");
 
             return true;
+        }
+
+        public async Task<List<FeeResponseDto>> AddFeeAsync(CreateFeeDto dto)
+        {
+            // Validate due date is not in the past
+            DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (dto.DueDate < today)
+                throw new InvalidDueDateException();
+
+            // Get all active students in the given class (all sections)
+            var students = await _studentRepo.GetAllByClassAsync(dto.Class);
+            if (!students.Any())
+                throw new NoStudentsInClassException(dto.Class);
+
+            // Create one fee record per student
+            var fees = students.Select(s => new Fee
+            {
+                Name = dto.Name,
+                Amount = dto.Amount,
+                AdmnNo = s.AdmnNo,
+                DueDate = dto.DueDate,
+                Status = FeeStatus.Unpaid
+            }).ToList();
+
+            await _feeRepo.AddRangeAsync(fees);
+
+            await _logRepo.AddAsync(
+                $"Admin added fee '{dto.Name}' of amount '{dto.Amount}' for class '{dto.Class}' — {fees.Count} records created");
+
+            return fees.Select(f => new FeeResponseDto
+            {
+                FeeId = f.FeeId,
+                Name = f.Name,
+                Amount = f.Amount,
+                AdmnNo = f.AdmnNo,
+                DueDate = f.DueDate,
+                Status = f.Status.ToString()
+            }).ToList();
         }
     }
 }

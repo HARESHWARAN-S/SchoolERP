@@ -164,6 +164,11 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-
+        [HttpPost("add-fee")]
+        public async Task<IActionResult> AddFee([FromBody] CreateFeeDto dto)
+        {
+            var result = await _adminService.AddFeeAsync(dto);
+            return Ok(result);
+        }
     }
 }

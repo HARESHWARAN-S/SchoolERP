@@ -42,4 +42,9 @@ namespace SchoolERP.Models.Enums
         Absent = 0,
         Present = 1
     }
+    public enum FeeStatus
+    {
+        Unpaid,
+        Paid
+    }
 }
