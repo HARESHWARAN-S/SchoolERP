@@ -30,7 +30,8 @@ namespace SchoolERP.Repositories
                 .Include(s => s.Teacher)
                 .FirstOrDefaultAsync(s =>
                     s.Class == Class &&
-                    s.Sec == sec );
+                    s.Sec == sec &&
+                    s.TeacherId == teacherId);
         }
 
         public async Task<List<Subject>> GetAllAsync()

@@ -11,5 +11,7 @@ namespace SchoolERP.Services.Interfaces
         Task<PayFeeResponseDto> PayFeeAsync(string admnNo, int feeId);
         Task<List<PaymentHistoryResponseDto>> GetPaymentHistoryAsync(string admnNo);
         Task<List<FeeDueResponseDto>> GetFeeDueAsync(string admnNo);
+        Task<List<LeaveDetailsResponseDto>> GetLeaveDetailsAsync(string admnNo);
+        Task<List<StudentMarkResponseDto>> GetMarksAsync(string admnNo);
     }
 }

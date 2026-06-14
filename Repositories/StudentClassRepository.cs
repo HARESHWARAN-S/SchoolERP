@@ -45,5 +45,12 @@ namespace SchoolERP.Repositories
             _context.StudentClasses.Remove(studentClass);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<StudentClass?> GetByClassTeacherIdAsync(string teacherId)
+        {
+            return await _context.StudentClasses
+                .Include(sc => sc.ClassTeacher)
+                .FirstOrDefaultAsync(sc => sc.ClassTeacherId == teacherId);
+        }
     }
 }

@@ -63,5 +63,19 @@ namespace SchoolERP.Repositories
                 .Where(s => s.Class == Class && s.RollNo != -1)
                 .ToListAsync();
         }
+
+        public async Task<List<Student>> GetByClassSecOrderedAsync(string Class, string sec)
+        {
+            return await _context.Students
+                .Where(s => s.Class == Class && s.Sec == sec && s.RollNo != -1)
+                .OrderBy(s => s.RollNo)
+                .ToListAsync();
+        }
+
+        public async Task<StudentClass?> GetByClassTeacherIdAsync(string teacherId)
+        {
+            return await _context.StudentClasses
+                .FirstOrDefaultAsync(sc => sc.ClassTeacherId == teacherId);
+        }
     }
 }

@@ -76,6 +76,8 @@ namespace SchoolERP.Exceptions
     {
         public AttendanceAlreadyMarkedException(string teacherId, DateOnly date)
             : base($"Attendance for teacher '{teacherId}' on '{date}' is already marked") { }
+        public AttendanceAlreadyMarkedException(string Class, string sec, DateOnly date)
+            : base($"Attendance for class '{Class}-{sec}' on '{date}' is already marked") { }
     }
 
     public class InvalidAttendanceStatusException : Exception
@@ -134,5 +136,46 @@ namespace SchoolERP.Exceptions
     {
         public FeeNotBelongToStudentException(int feeId, string admnNo)
             : base($"Fee '{feeId}' does not belong to student '{admnNo}'") { }
+    }
+
+        public class NotAClassTeacherException : Exception
+    {
+        public NotAClassTeacherException(string teacherId)
+            : base($"Teacher '{teacherId}' is not a class teacher") { }
+    }
+
+    public class AttendanceStrengthMismatchException : Exception
+    {
+        public AttendanceStrengthMismatchException(int expected, int actual)
+            : base($"Attendance list length '{actual}' does not match class strength '{expected}'") { }
+    }
+
+    public class InvalidAttendanceValueException : Exception
+    {
+        public InvalidAttendanceValueException()
+            : base("Attendance list can only contain 0 (Absent) or 1 (Present)") { }
+    }
+
+    public class RollNumberNotAssignedException : Exception
+    {
+        public RollNumberNotAssignedException(string Class, string sec)
+            : base($"Roll numbers not assigned for class '{Class}-{sec}'. Please assign roll numbers first") { }
+    }
+        public class MarkListStrengthMismatchException : Exception
+    {
+        public MarkListStrengthMismatchException(int expected, int actual)
+            : base($"Marks list length '{actual}' does not match class strength '{expected}'") { }
+    }
+
+    public class MarksOutOfRangeException : Exception
+    {
+        public MarksOutOfRangeException(decimal mark, decimal totalMarks)
+            : base($"Mark '{mark}' is invalid. Must be -1 (absent) or between 0 and {totalMarks}") { }
+    }
+
+    public class MarksAlreadyEnteredForExamException : Exception
+    {
+        public MarksAlreadyEnteredForExamException(string examName, string subject, string Class, string sec)
+            : base($"Marks for exam '{examName}' subject '{subject}' in class '{Class}-{sec}' already entered") { }
     }
 }

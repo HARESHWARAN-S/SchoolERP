@@ -18,6 +18,8 @@ namespace SchoolERP.Services
         private readonly IFeeRepository _feeRepo;
         private readonly IPaymentRepository _paymentRepo;
         private readonly IStripeService _stripeService;
+        private readonly IStudentAttendanceRepository _studentAttendanceRepo;
+        private readonly IMarkRepository _markRepo;
 
         public StudentService(
             IStudentRepository studentRepo,
@@ -28,7 +30,9 @@ namespace SchoolERP.Services
             IHomeworkRepository homeworkRepo,
             IFeeRepository feeRepo,
             IPaymentRepository paymentRepo,
-            IStripeService stripeService)
+            IStripeService stripeService,
+            IStudentAttendanceRepository studentAttendanceRepo,
+            IMarkRepository markRepo)
         {
             _studentRepo = studentRepo;
             _loginRepo = loginRepo;
@@ -39,6 +43,8 @@ namespace SchoolERP.Services
             _feeRepo = feeRepo;
             _paymentRepo = paymentRepo;
             _stripeService = stripeService;
+            _studentAttendanceRepo = studentAttendanceRepo;
+            _markRepo = markRepo;
         }
 
         public async Task<StudentResponseDto> GetMyDetailsAsync(string admnNo)
@@ -258,6 +264,52 @@ namespace SchoolERP.Services
                 Name = f.Name,
                 Amount = f.Amount,
                 DueDate = f.DueDate
+            }).ToList();
+        }
+
+        public async Task<List<LeaveDetailsResponseDto>> GetLeaveDetailsAsync(string admnNo)
+        {
+            // Check student exists and is active
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
+
+            var absentDates = await _studentAttendanceRepo.GetAbsentDatesAsync(admnNo);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed leave details");
+
+            return absentDates.Select(a => new LeaveDetailsResponseDto
+            {
+                Date = a.Date
+            }).ToList();
+        }
+
+        public async Task<List<StudentMarkResponseDto>> GetMarksAsync(string admnNo)
+        {
+            // Check student exists and is active
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
+
+            var marks = await _markRepo.GetByStudentAsync(admnNo);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed marks");
+
+            return marks.Select(m => new StudentMarkResponseDto
+            {
+                ExamName = m.ExamName,
+                Subject = m.Subject,
+                Date = m.Date,
+                MarksObtained = m.MarksObtained == -1 ? "Absent" : m.MarksObtained.ToString(),
+                TotalMarks = m.TotalMarks
             }).ToList();
         }
     }

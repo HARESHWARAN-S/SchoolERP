@@ -67,5 +67,23 @@ namespace SchoolERP.Controllers
             var result = await _teacherService.AddHomeworkAsync(teacherId, dto);
             return Ok(result);
         }
+
+        // Mark Student Attendance
+        [HttpPost("mark-attendance")]
+        public async Task<IActionResult> MarkStudentAttendance([FromBody] MarkStudentAttendanceDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.MarkStudentAttendanceAsync(teacherId, dto);
+            return Ok(result);
+        }
+
+        // Marks Entry
+        [HttpPost("add-marks")]
+        public async Task<IActionResult> AddMarks([FromBody] MarkEntryDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.AddMarksAsync(teacherId, dto);
+            return Ok(result);
+        }
     }
 }

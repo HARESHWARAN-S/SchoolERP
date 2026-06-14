@@ -9,5 +9,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task<List<Subject>> GetByClassAsync(string Class, string sec);
         Task AddAsync(Subject subject);
         Task<Subject?> GetByClassSecSubjectTeacherAsync(string Class, string sec, string subject, string teacherId);
+        Task<Subject?> GetByTeacherAsync(string Class, string sec, string teacherId);
     }
 }

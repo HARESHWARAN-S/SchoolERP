@@ -20,6 +20,8 @@ namespace SchoolERP.Contexts
         public DbSet<Homework> Homeworks { get; set; }
         public DbSet<Fee> Fees { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<StudentAttendance> StudentAttendances { get; set; }
+        public DbSet<Mark> Marks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +33,8 @@ namespace SchoolERP.Contexts
                 .HasKey(ta => new { ta.TeacherId, ta.Date });
             modelBuilder.Entity<Subject>()
                 .HasKey(s => new { s.Class, s.Sec, s.SubjectName });
+            modelBuilder.Entity<StudentAttendance>()
+                .HasKey(sa => new { sa.AdmnNo, sa.Date });
 
             // Decimal Precision
             modelBuilder.Entity<Admin>()
@@ -44,6 +48,11 @@ namespace SchoolERP.Contexts
 
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Amount).HasPrecision(10, 2);
+            modelBuilder.Entity<Mark>()
+                .Property(m => m.MarksObtained).HasPrecision(6, 2);
+
+            modelBuilder.Entity<Mark>()
+                .Property(m => m.TotalMarks).HasPrecision(6, 2);
 
 
             // Enums as strings
@@ -67,6 +76,8 @@ namespace SchoolERP.Contexts
                 .Property(ta => ta.Status).HasConversion<string>();
             modelBuilder.Entity<Fee>()
                 .Property(f => f.Status).HasConversion<string>();
+            modelBuilder.Entity<StudentAttendance>()
+                .Property(sa => sa.Status).HasConversion<string>();
 
             // Relationships
             modelBuilder.Entity<Admin>()
@@ -130,9 +141,19 @@ namespace SchoolERP.Contexts
                 .HasForeignKey(s => s.TeacherId);
 
             modelBuilder.Entity<Homework>()
-            .HasOne(h => h.StudentClass)
-            .WithMany()
-            .HasForeignKey(h => new { h.Class, h.Sec });
+                .HasOne(h => h.StudentClass)
+                .WithMany()
+                .HasForeignKey(h => new { h.Class, h.Sec });
+
+            modelBuilder.Entity<StudentAttendance>()
+                .HasOne(sa => sa.Student)
+                .WithMany()
+                .HasForeignKey(sa => sa.AdmnNo);
+
+            modelBuilder.Entity<Mark>()
+                .HasOne(m => m.Student)
+                .WithMany()
+                .HasForeignKey(m => m.AdmnNo);
         }
     }
 }

@@ -30,6 +30,8 @@ builder.Services.AddScoped<IHomeworkRepository, HomeworkRepository>();
 builder.Services.AddScoped<IFeeRepository, FeeRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IStudentAttendanceRepository, StudentAttendanceRepository>();
+builder.Services.AddScoped<IMarkRepository, MarkRepository>();
 
 // Services
 builder.Services.AddScoped<ILoginService, LoginService>();

@@ -405,7 +405,8 @@ namespace SchoolERP.Services
                 Class = dto.Class,
                 Sec = dto.Sec,
                 ClassTimetable = dto.ClassTimetable,
-                ClassTeacherId = dto.ClassTeacherId
+                ClassTeacherId = dto.ClassTeacherId,
+                ClassStrength = dto.ClassStrength
             };
             await _studentClassRepo.AddAsync(studentClass);
 

@@ -9,5 +9,7 @@ namespace SchoolERP.Services.Interfaces
         Task<string> GetMyTimeTableAsync(string teacherId);
         Task<List<TeacherLeaveDetailsDto>> GetMyLeaveDetailsAsync(string teacherId);
         Task<HomeworkResponseDto> AddHomeworkAsync(string teacherId, CreateHomeworkDto dto);
+        Task<List<StudentAttendanceResponseDto>> MarkStudentAttendanceAsync(string teacherId, MarkStudentAttendanceDto dto);
+        Task<List<MarkEntryResponseDto>> AddMarksAsync(string teacherId, MarkEntryDto dto);
     }
 }

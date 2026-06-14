@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SchoolERP.Contexts;
@@ -11,9 +12,11 @@ using SchoolERP.Contexts;
 namespace SchoolERP.Migrations
 {
     [DbContext(typeof(SchoolERPDbContext))]
-    partial class SchoolERPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260614143845_AddStudentAttendanceTable")]
+    partial class AddStudentAttendanceTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,52 +196,6 @@ namespace SchoolERP.Migrations
                     b.HasKey("Username");
 
                     b.ToTable("Logins");
-                });
-
-            modelBuilder.Entity("SchoolERP.Models.Entities.Mark", b =>
-                {
-                    b.Property<int>("MarkId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarkId"));
-
-                    b.Property<string>("AdmnNo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Class")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("ExamName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("MarksObtained")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("numeric(6,2)");
-
-                    b.Property<string>("Sec")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("TotalMarks")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("numeric(6,2)");
-
-                    b.HasKey("MarkId");
-
-                    b.HasIndex("AdmnNo");
-
-                    b.ToTable("Marks");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Notification", b =>
@@ -538,17 +495,6 @@ namespace SchoolERP.Migrations
                         .IsRequired();
 
                     b.Navigation("StudentClass");
-                });
-
-            modelBuilder.Entity("SchoolERP.Models.Entities.Mark", b =>
-                {
-                    b.HasOne("SchoolERP.Models.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("AdmnNo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Payment", b =>

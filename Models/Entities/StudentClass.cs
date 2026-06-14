@@ -8,6 +8,7 @@ namespace SchoolERP.Models.Entities
         public string Sec { get; set; } = string.Empty;
         public string ClassTimetable { get; set; } = string.Empty;
         public string ClassTeacherId { get; set; } = string.Empty;
+        public int ClassStrength { get; set; } = 0;
 
         // Navigation
         public Teacher? ClassTeacher { get; set; }

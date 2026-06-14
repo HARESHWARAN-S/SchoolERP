@@ -38,6 +38,13 @@ namespace SchoolERP.Middleware
                         InvalidDueDateException                         => 400,
                         NoStudentsInClassException                      => 404,
                         FeeNotBelongToStudentException                  => 403,
+                        NotAClassTeacherException                       => 403,
+                        AttendanceStrengthMismatchException             => 400,
+                        InvalidAttendanceValueException                 => 400,
+                        RollNumberNotAssignedException                  => 400,
+                        MarkListStrengthMismatchException               => 400,
+                        MarksOutOfRangeException                        => 400,
+                        MarksAlreadyEnteredForExamException             => 409,
                         _                                               => 500
                     };
 

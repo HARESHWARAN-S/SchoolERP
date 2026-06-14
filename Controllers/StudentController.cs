@@ -84,5 +84,22 @@ namespace SchoolERP.Controllers
             var result = await _studentService.GetPaymentHistoryAsync(admnNo);
             return Ok(result);
         }
+
+        [HttpGet("leave-details")]
+        public async Task<IActionResult> GetLeaveDetails()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetLeaveDetailsAsync(admnNo);
+            return Ok(result);
+        }
+
+        // View Marks
+        [HttpGet("marks")]
+        public async Task<IActionResult> GetMarks()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetMarksAsync(admnNo);
+            return Ok(result);
+        }
     }
 }
