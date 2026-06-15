@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SchoolERP.Models.Entities;
+using Microsoft.EntityFrameworkCore.ChangeTracking;        
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion; 
+using SchoolERP.Models;
 
 namespace SchoolERP.Contexts
 {
@@ -26,6 +29,37 @@ namespace SchoolERP.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // DateOnly converter for InMemoryDatabase compatibility
+            var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
+                d => d.ToDateTime(TimeOnly.MinValue),
+                d => DateOnly.FromDateTime(d));
+
+            var dateOnlyComparer = new ValueComparer<DateOnly>(
+                (x, y) => x == y,
+                d => d.GetHashCode(),
+                d => d);
+
+            // Apply to all DateOnly properties
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateOnly))
+                    {
+                        property.SetValueConverter(dateOnlyConverter);
+                        property.SetValueComparer(dateOnlyComparer);
+                    }
+                    if (property.ClrType == typeof(DateOnly?))
+                    {
+                        var nullableDateOnlyConverter = new ValueConverter<DateOnly?, DateTime?>(
+                            d => d == null ? null : d.Value.ToDateTime(TimeOnly.MinValue),
+                            d => d == null ? null : DateOnly.FromDateTime(d.Value));
+                        property.SetValueConverter(nullableDateOnlyConverter);
+                    }
+                }
+            }
+
             // Composite Primary Key
             modelBuilder.Entity<StudentClass>()
                 .HasKey(sc => new { sc.Class, sc.Sec });
