@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolERP.Models.DTOs;
 using SchoolERP.Services.Interfaces;
+using System.Security.Claims;
 
 namespace SchoolERP.Controllers
 {
@@ -168,6 +169,14 @@ namespace SchoolERP.Controllers
         public async Task<IActionResult> AddFee([FromBody] CreateFeeDto dto)
         {
             var result = await _adminService.AddFeeAsync(dto);
+            return Ok(result);
+        }
+
+        [HttpGet("my-profile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.Name)!; // ← from JWT token
+            var result = await _adminService.GetMyProfileAsync(adminId);
             return Ok(result);
         }
     }

@@ -25,5 +25,6 @@ namespace SchoolERP.Services.Interfaces
         Task<List<SubjectResponseDto>> GetSubjectsByClassAsync(string Class, string sec);
         Task<bool> AssignRollNumbersAsync(string Class, string sec);
         Task<List<FeeResponseDto>> AddFeeAsync(CreateFeeDto dto);
+        Task<AdminProfileResponseDto> GetMyProfileAsync(string adminId);
     }
 }

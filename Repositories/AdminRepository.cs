@@ -35,8 +35,17 @@ namespace SchoolERP.Repositories
 
         public async Task<string> GetNextAdminIdAsync()
         {
-            int count = await _context.Admins.CountAsync();
-            return "A" + (count + 1).ToString();
+            var admins = await _context.Admins.ToListAsync();
+            if (!admins.Any())
+                return "A1";
+
+            int maxId = admins
+                .Select(a => a.AdminId.Replace("A", ""))
+                .Where(a => int.TryParse(a, out _))
+                .Select(a => int.Parse(a))
+                .Max();
+
+            return "A" + (maxId + 1).ToString();
         }
 
         public async Task AddAsync(Admin admin)

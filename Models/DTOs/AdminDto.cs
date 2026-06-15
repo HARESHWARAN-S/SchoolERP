@@ -56,4 +56,15 @@ namespace SchoolERP.Models.DTOs
         public string AdminName { get; set; } = string.Empty;
         public string ContactNo { get; set; } = string.Empty;
     }
+
+    public class AdminProfileResponseDto
+    {
+        public string AdminId { get; set; } = string.Empty;
+        public string AdminName { get; set; } = string.Empty;
+        public DateOnly DOB { get; set; }
+        public Gender Gender { get; set; }
+        public BloodGroup BloodGrp { get; set; }
+        public string ContactNo { get; set; } = string.Empty;
+        public string PhotoUrl { get; set; } = string.Empty;
+    }
 }

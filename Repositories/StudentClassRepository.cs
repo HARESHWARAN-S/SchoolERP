@@ -52,5 +52,11 @@ namespace SchoolERP.Repositories
                 .Include(sc => sc.ClassTeacher)
                 .FirstOrDefaultAsync(sc => sc.ClassTeacherId == teacherId);
         }
+
+        public async Task UpdateAsync(StudentClass studentClass)
+        {
+            _context.StudentClasses.Update(studentClass);
+            await _context.SaveChangesAsync();
+        }
     }
 }

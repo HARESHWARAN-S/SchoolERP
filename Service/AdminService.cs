@@ -234,6 +234,9 @@ namespace SchoolERP.Services
                 Address = dto.Address,
                 ContactNo = dto.ContactNo
             };
+            studentClass.ClassStrength+=1;
+            await _studentClassRepo.UpdateAsync(studentClass);
+
             await _studentRepo.AddAsync(student);
 
             await _logRepo.AddAsync($"Admin added new student '{admnNo}'");
@@ -253,6 +256,11 @@ namespace SchoolERP.Services
 
             login.Status = UserStatus.Inactive;
             student.RollNo = -1;
+
+            var studentClass =await _studentClassRepo.GetAsync(student.Class,student.Sec);
+            studentClass.ClassStrength-=1;
+            await _studentClassRepo.UpdateAsync(studentClass);
+
             await _loginRepo.UpdateAsync(login);
 
             await _logRepo.AddAsync($"Admin removed student '{admnNo}' (soft delete)");
@@ -430,7 +438,7 @@ namespace SchoolERP.Services
                 ClassTimetable = studentClass.ClassTimetable,
                 ClassTeacherId = studentClass.ClassTeacherId,
                 ClassTeacherName = teacher.Name,
-                SubjectName = dto.SubjectName
+                //SubjectName = dto.SubjectName
             };
         }
         /*
@@ -456,7 +464,8 @@ namespace SchoolERP.Services
                 Sec = sc.Sec,
                 ClassTimetable = sc.ClassTimetable,
                 ClassTeacherId = sc.ClassTeacherId,
-                ClassTeacherName = sc.ClassTeacher?.Name ?? "Unknown"
+                ClassTeacherName = sc.ClassTeacher?.Name ?? "Unknown",
+                ClassStrength = sc.ClassStrength
             }).ToList();
         }
 
@@ -672,6 +681,26 @@ namespace SchoolERP.Services
                 DueDate = f.DueDate,
                 Status = f.Status.ToString()
             }).ToList();
+        }
+
+        public async Task<AdminProfileResponseDto> GetMyProfileAsync(string adminId)
+        {
+            var admin = await _adminRepo.GetByIdAsync(adminId);
+            if (admin == null)
+                throw new AdminNotFoundException(adminId);
+
+            await _logRepo.AddAsync($"Admin '{adminId}' viewed their profile");
+
+            return new AdminProfileResponseDto
+            {
+                AdminId = admin.AdminId,
+                AdminName = admin.AdminName,
+                DOB = admin.DOB,
+                Gender = admin.Gender,
+                BloodGrp = admin.BloodGrp,
+                ContactNo = admin.ContactNo,
+                PhotoUrl = admin.PhotoUrl
+            };
         }
     }
 }

@@ -28,8 +28,17 @@ namespace SchoolERP.Repositories
 
         public async Task<string> GetNextTeacherIdAsync()
         {
-            int count = await _context.Teachers.CountAsync();
-            return "T" + (count + 1).ToString();
+            var teachers = await _context.Teachers.ToListAsync();
+            if (!teachers.Any())
+                return "T1";
+
+            int maxId = teachers
+                .Select(t => t.TeacherId.Replace("T", ""))
+                .Where(t => int.TryParse(t, out _))
+                .Select(t => int.Parse(t))
+                .Max();
+
+            return "T" + (maxId + 1).ToString();
         }
 
         public async Task AddAsync(Teacher teacher)
