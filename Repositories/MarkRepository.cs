@@ -38,5 +38,21 @@ namespace SchoolERP.Repositories
             await _context.Marks.AddRangeAsync(marks);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Mark?> GetByAdmnNoExamSubjectAsync(
+            string admnNo, string examName, string subject)
+        {
+            return await _context.Marks
+                .FirstOrDefaultAsync(m =>
+                    m.AdmnNo == admnNo &&
+                    m.ExamName == examName &&
+                    m.Subject == subject);
+        }
+
+        public async Task UpdateAsync(Mark mark)
+        {
+            _context.Marks.Update(mark);
+            await _context.SaveChangesAsync();
+        }
     }
 }

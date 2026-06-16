@@ -86,5 +86,14 @@ namespace SchoolERP.Repositories
             return await _context.StudentClasses
                 .FirstOrDefaultAsync(sc => sc.ClassTeacherId == teacherId);
         }
+
+        public async Task<Student?> GetByClassSecRollNoAsync(string Class, string sec, int rollNo)
+        {
+            return await _context.Students
+                .FirstOrDefaultAsync(s =>
+                    s.Class == Class &&
+                    s.Sec == sec &&
+                    s.RollNo == rollNo);
+        }
     }
 }

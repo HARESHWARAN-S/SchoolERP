@@ -7,5 +7,7 @@ namespace SchoolERP.Repositories.Interfaces
         Task<bool> ExistsAsync(string examName, string subject, string Class, string sec);
         Task<List<Mark>> GetByStudentAsync(string admnNo);
         Task AddRangeAsync(List<Mark> marks);
+        Task UpdateAsync(Mark mark);
+        Task<Mark?> GetByAdmnNoExamSubjectAsync(string admnNo, string examName, string subject);
     }
 }

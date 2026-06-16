@@ -14,5 +14,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task<List<Student>> GetAllByClassAsync(string Class);
         Task<List<Student>> GetByClassSecOrderedAsync(string Class, string sec);
         Task<StudentClass?> GetByClassTeacherIdAsync(string teacherId);
+        Task<Student?> GetByClassSecRollNoAsync(string Class, string sec, int rollNo);
     }
 }

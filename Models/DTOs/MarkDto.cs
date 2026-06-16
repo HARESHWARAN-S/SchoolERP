@@ -29,4 +29,25 @@ namespace SchoolERP.Models.DTOs
         public string MarksObtained { get; set; } = string.Empty; 
         public decimal TotalMarks { get; set; }
     }
+
+    public class UpdateMarkDto
+    {
+        public string Class { get; set; } = string.Empty;
+        public string Sec { get; set; } = string.Empty;
+        public int RollNo { get; set; }
+        public string ExamName { get; set; } = string.Empty;
+        public decimal NewMarks { get; set; } 
+    }
+
+    public class UpdateMarkResponseDto
+    {
+        public string AdmnNo { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int RollNo { get; set; }
+        public string ExamName { get; set; } = string.Empty;
+        public string Subject { get; set; } = string.Empty;
+        public DateOnly Date { get; set; }
+        public string MarksObtained { get; set; } = string.Empty;
+        public decimal TotalMarks { get; set; }
+    }
 }

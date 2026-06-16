@@ -321,5 +321,53 @@ namespace SchoolERP.Services
 
             return result;
         }
+
+        public async Task<UpdateMarkResponseDto> UpdateMarksAsync(string teacherId, UpdateMarkDto dto)
+        {
+            var teacher = await _teacherRepo.GetByIdAsync(teacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(teacherId);
+
+            var teacherStatus = await _loginRepo.GetStatusAsync(teacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(teacherId);
+
+            var subjectRecord = await _subjectRepo.GetByTeacherAsync(dto.Class, dto.Sec, teacherId);
+            if (subjectRecord == null)
+                throw new UnauthorizedSubjectAccessException(teacherId, "", dto.Class, dto.Sec);
+
+            string subjectName = subjectRecord.SubjectName;
+
+            var student = await _studentRepo.GetByClassSecRollNoAsync(dto.Class, dto.Sec, dto.RollNo);
+            if (student == null)
+                throw new StudentNotFoundException($"RollNo {dto.RollNo} in class {dto.Class}-{dto.Sec}");
+
+            var mark = await _markRepo.GetByAdmnNoExamSubjectAsync(
+                student.AdmnNo, dto.ExamName, subjectName);
+            if (mark == null)
+                throw new MarkRecordNotFoundException(
+                    dto.RollNo, dto.ExamName, subjectName, dto.Class, dto.Sec);
+
+            if (dto.NewMarks != -1 && (dto.NewMarks < 0 || dto.NewMarks > mark.TotalMarks))
+                throw new MarksOutOfRangeException(dto.NewMarks, mark.TotalMarks);
+
+            mark.MarksObtained = dto.NewMarks;
+            await _markRepo.UpdateAsync(mark);
+
+            await _logRepo.AddAsync(
+                $"Teacher '{teacherId}' updated marks for roll no '{dto.RollNo}' exam '{dto.ExamName}' subject '{subjectName}' in class '{dto.Class}-{dto.Sec}'");
+
+            return new UpdateMarkResponseDto
+            {
+                AdmnNo = student.AdmnNo,
+                Name = student.Name,
+                RollNo = student.RollNo,
+                ExamName = mark.ExamName,
+                Subject = mark.Subject,
+                Date = mark.Date,
+                MarksObtained = mark.MarksObtained == -1 ? "Absent" : mark.MarksObtained.ToString(),
+                TotalMarks = mark.TotalMarks
+            };
+        }
     }
 }

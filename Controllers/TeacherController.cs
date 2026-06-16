@@ -81,5 +81,13 @@ namespace SchoolERP.Controllers
             var result = await _teacherService.AddMarksAsync(teacherId, dto);
             return Ok(result);
         }
+
+        [HttpPut("update-marks")]
+        public async Task<IActionResult> UpdateMarks([FromBody] UpdateMarkDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.UpdateMarksAsync(teacherId, dto);
+            return Ok(result);
+        }
     }
 }

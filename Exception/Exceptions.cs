@@ -184,4 +184,10 @@ namespace SchoolERP.Exceptions
         public AdminAttendanceAlreadyMarkedException(string adminId, DateOnly date)
             : base($"Attendance for admin '{adminId}' on '{date}' is already marked") { }
     }
+    
+    public class MarkRecordNotFoundException : Exception
+    {
+        public MarkRecordNotFoundException(int rollNo, string examName, string subject, string Class, string sec)
+            : base($"Mark record not found for roll no '{rollNo}' exam '{examName}' subject '{subject}' class '{Class}-{sec}'") { }
+    }
 }
