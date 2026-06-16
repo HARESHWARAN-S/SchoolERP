@@ -22,13 +22,11 @@ namespace SchoolERP.Controllers
             _loginService = loginService;
         }
 
-        // Gets teacherId from JWT token automatically
         private string GetCurrentUserId()
         {
             return User.FindFirstValue(ClaimTypes.Name)!;
         }
 
-        // View own profile — no need to pass teacherId
         [HttpGet("MyProfile")]
         public async Task<IActionResult> GetMyDetails()
         {
@@ -68,7 +66,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Mark Student Attendance
         [HttpPost("mark-attendance")]
         public async Task<IActionResult> MarkStudentAttendance([FromBody] MarkStudentAttendanceDto dto)
         {
@@ -77,7 +74,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Marks Entry
         [HttpPost("add-marks")]
         public async Task<IActionResult> AddMarks([FromBody] MarkEntryDto dto)
         {

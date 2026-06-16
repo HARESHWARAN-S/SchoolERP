@@ -119,23 +119,19 @@ namespace SchoolERP.Services
 
         public async Task<HomeworkResponseDto> AddHomeworkAsync(string teacherId, CreateHomeworkDto dto)
         {
-            // Check teacher exists
             var teacher = await _teacherRepo.GetByIdAsync(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
 
-            // Check teacher is active
             var teacherStatus = await _loginRepo.GetStatusAsync(teacherId);
             if (teacherStatus == UserStatus.Inactive)
                 throw new UserInactiveException(teacherId);
 
-            // Check teacher is assigned to this subject for this class
             var subject = await _subjectRepo.GetByClassSecSubjectTeacherAsync(
                 dto.Class, dto.Sec, dto.Subject, teacherId);
             if (subject == null)
                 throw new UnauthorizedSubjectAccessException(teacherId, dto.Subject, dto.Class, dto.Sec);
 
-            // Check homework not already given today for same subject
             DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
             var existing = await _homeworkRepo.GetAsync(dto.Class, dto.Sec, dto.Subject, today);
             if (existing != null)
@@ -168,7 +164,6 @@ namespace SchoolERP.Services
         public async Task<List<StudentAttendanceResponseDto>> MarkStudentAttendanceAsync(
             string teacherId, MarkStudentAttendanceDto dto)
         {
-            // Check teacher exists and is active
             var teacher = await _teacherRepo.GetByIdAsync(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
@@ -177,36 +172,29 @@ namespace SchoolERP.Services
             if (teacherStatus == UserStatus.Inactive)
                 throw new UserInactiveException(teacherId);
 
-            // Check teacher is a class teacher
             var studentClass = await _studentClassRepo.GetByClassTeacherIdAsync(teacherId);
             if (studentClass == null)
                 throw new NotAClassTeacherException(teacherId);
 
-            // Validate attendance list values — only 0 or 1 allowed
             if (dto.Attendance.Any(a => a != 0 && a != 1))
                 throw new InvalidAttendanceValueException();
 
-            // Validate list length matches class strength
             if (dto.Attendance.Count != studentClass.ClassStrength)
                 throw new AttendanceStrengthMismatchException(studentClass.ClassStrength, dto.Attendance.Count);
 
-            // Check attendance not already marked today
             DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
             bool alreadyMarked = await _studentAttendanceRepo.ExistsAsync(
                 studentClass.Class, studentClass.Sec, today);
             if (alreadyMarked)
                 throw new AttendanceAlreadyMarkedException(studentClass.Class, studentClass.Sec, today);
 
-            // Get students ordered by roll number
             var students = await _studentRepo.GetByClassSecOrderedAsync(
                 studentClass.Class, studentClass.Sec);
 
-            // Check roll numbers are assigned
             var unassigned = students.Where(s => s.RollNo.Equals(0)).Any();
             if (unassigned)
                 throw new RollNumberNotAssignedException(studentClass.Class, studentClass.Sec);
 
-            // Build attendance records
             var attendanceRecords = new List<StudentAttendance>();
             var result = new List<StudentAttendanceResponseDto>();
 
@@ -226,7 +214,6 @@ namespace SchoolERP.Services
                     Status = status
                 });
 
-                // Update student attendance stats
                 student.TotalDays += 1;
                 if (status == AttendanceStatus.Present)
                     student.PresentDays += 1;
@@ -243,10 +230,8 @@ namespace SchoolERP.Services
                 });
             }
 
-            // Save attendance records
             await _studentAttendanceRepo.AddRangeAsync(attendanceRecords);
 
-            // Update student stats in DB
             await _studentRepo.UpdateRangeAsync(students);
 
             await _logRepo.AddAsync(
@@ -258,7 +243,6 @@ namespace SchoolERP.Services
         public async Task<List<MarkEntryResponseDto>> AddMarksAsync(
             string teacherId, MarkEntryDto dto)
         {
-            // Check teacher exists and is active
             var teacher = await _teacherRepo.GetByIdAsync(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
@@ -267,40 +251,33 @@ namespace SchoolERP.Services
             if (teacherStatus == UserStatus.Inactive)
                 throw new UserInactiveException(teacherId);
 
-            // Auto fetch subject from subject table using class+sec+teacherId
             var subjectRecord = await _subjectRepo.GetByTeacherAsync(dto.Class, dto.Sec, teacherId);
             if (subjectRecord == null)
                 throw new UnauthorizedSubjectAccessException(teacherId, "", dto.Class, dto.Sec);
 
-            string subjectName = subjectRecord.SubjectName; // ← fetched automatically
+            string subjectName = subjectRecord.SubjectName; 
 
-            // Get class to check strength
             var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
             if (studentClass == null)
                 throw new StudentClassNotFoundException(dto.Class, dto.Sec);
 
-            // Validate marks list length matches class strength
             if (dto.Marks.Count != studentClass.ClassStrength)
                 throw new MarkListStrengthMismatchException(studentClass.ClassStrength, dto.Marks.Count);
 
-            // Validate each mark — must be -1 or between 0 and TotalMarks
             foreach (var mark in dto.Marks)
             {
                 if (mark != -1 && (mark < 0 || mark > dto.TotalMarks))
                     throw new MarksOutOfRangeException(mark, dto.TotalMarks);
             }
 
-            // Check marks not already entered for this exam+subject+class
             bool alreadyEntered = await _markRepo.ExistsAsync(
                 dto.ExamName, subjectName, dto.Class, dto.Sec);
             if (alreadyEntered)
                 throw new MarksAlreadyEnteredForExamException(
                     dto.ExamName, subjectName, dto.Class, dto.Sec);
 
-            // Get students ordered by roll number
             var students = await _studentRepo.GetByClassSecOrderedAsync(dto.Class, dto.Sec);
 
-            // Check roll numbers assigned
             if (students.Any(s => s.RollNo == 0))
                 throw new RollNumberNotAssignedException(dto.Class, dto.Sec);
 
@@ -317,7 +294,7 @@ namespace SchoolERP.Services
                 {
                     AdmnNo = student.AdmnNo,
                     ExamName = dto.ExamName,
-                    Subject = subjectName, // ← auto fetched
+                    Subject = subjectName,
                     Date = today,
                     Class = dto.Class,
                     Sec = dto.Sec,
@@ -331,7 +308,7 @@ namespace SchoolERP.Services
                     Name = student.Name,
                     RollNo = student.RollNo,
                     ExamName = dto.ExamName,
-                    Subject = subjectName, // ← auto fetched
+                    Subject = subjectName, 
                     Date = today,
                     MarksObtained = markValue == -1 ? "Absent" : markValue.ToString(),
                     TotalMarks = dto.TotalMarks

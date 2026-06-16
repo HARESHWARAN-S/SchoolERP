@@ -5,9 +5,8 @@ namespace SchoolERP.Models.DTOs
         public string Class { get; set; } = string.Empty;
         public string Sec { get; set; } = string.Empty;
         public string ExamName { get; set; } = string.Empty;
-        //public string Subject { get; set; } = string.Empty;
         public decimal TotalMarks { get; set; }
-        public List<decimal> Marks { get; set; } = new(); // -1 for absent
+        public List<decimal> Marks { get; set; } = new(); 
     }
 
     public class MarkEntryResponseDto
@@ -18,7 +17,7 @@ namespace SchoolERP.Models.DTOs
         public string ExamName { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
         public DateOnly Date { get; set; }
-        public string MarksObtained { get; set; } = string.Empty; // "Absent" or actual mark
+        public string MarksObtained { get; set; } = string.Empty; 
         public decimal TotalMarks { get; set; }
     }
 
@@ -27,7 +26,7 @@ namespace SchoolERP.Models.DTOs
         public string ExamName { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
         public DateOnly Date { get; set; }
-        public string MarksObtained { get; set; } = string.Empty; // "Absent" or actual mark
+        public string MarksObtained { get; set; } = string.Empty; 
         public decimal TotalMarks { get; set; }
     }
 }

@@ -2,7 +2,7 @@ namespace SchoolERP.Models.DTOs
 {
     public class MarkStudentAttendanceDto
     {
-        public List<int> Attendance { get; set; } = new(); // 0=Absent, 1=Present
+        public List<int> Attendance { get; set; } = new(); 
     }
 
     public class StudentAttendanceResponseDto

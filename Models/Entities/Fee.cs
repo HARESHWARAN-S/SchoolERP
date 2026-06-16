@@ -15,7 +15,6 @@ namespace SchoolERP.Models.Entities
         public string AdmnNo { get; set; } = string.Empty;
         public DateOnly DueDate { get; set; }
 
-        // Navigation
         public Student? Student { get; set; }
     }
 }

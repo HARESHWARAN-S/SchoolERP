@@ -20,13 +20,11 @@ namespace SchoolERP.Controllers
             _loginService = loginService;
         }
 
-        // Gets teacherId from JWT token automatically
         private string GetCurrentUserId()
         {
             return User.FindFirstValue(ClaimTypes.Name)!;
         }
 
-        // View own profile — no need to pass teacherId
         [HttpGet("MyProfile")]
         public async Task<IActionResult> GetMyDetails()
         {
@@ -58,7 +56,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Pay Fee
         [HttpPost("pay-fee/{feeId}")]
         public async Task<IActionResult> PayFee(int feeId)
         {
@@ -67,7 +64,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Fee Due
         [HttpGet("fee-due")]
         public async Task<IActionResult> GetFeeDue()
         {
@@ -76,7 +72,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Payment History
         [HttpGet("payment-history")]
         public async Task<IActionResult> GetPaymentHistory()
         {
@@ -93,7 +88,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // View Marks
         [HttpGet("marks")]
         public async Task<IActionResult> GetMarks()
         {

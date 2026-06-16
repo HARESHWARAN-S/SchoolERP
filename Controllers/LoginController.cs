@@ -19,8 +19,6 @@ namespace SchoolERP.Controllers
             _adminService = adminService;
         }
 
-        // ── No Auth — First time setup only ──────────────────────────────
-
         [HttpPost("setup")]
         [AllowAnonymous]
         public async Task<IActionResult> SetupFirstAdmin([FromBody] CreateFirstAdminDto dto)
@@ -51,14 +49,12 @@ namespace SchoolERP.Controllers
         {
             string username = User.FindFirstValue(ClaimTypes.Name)!;
 
-            // Extract token from Authorization header
             string token = Request.Headers["Authorization"]
                 .ToString()
                 .Replace("Bearer ", "")
                 .Trim();
 
             await _loginService.LogoutAsync(username, token);
-            //return Ok("Logged out successfully");
             Response.Headers["Authorization"] = "";
             Response.Headers["WWW-Authenticate"] = "Bearer";
 

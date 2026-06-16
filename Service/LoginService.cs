@@ -104,13 +104,12 @@ namespace SchoolERP.Services
             if (login == null)
                 throw new UserNotFoundException(username);
 
-            // Add token to blacklist
             await _blacklistRepo.AddAsync(new BlacklistedToken
             {
                 Token = token,
                 Username = username,
                 BlacklistedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddHours(8) // same as token expiry
+                ExpiresAt = DateTime.UtcNow.AddHours(8) 
             });
 
             await _logRepo.AddAsync($"User '{username}' logged out");

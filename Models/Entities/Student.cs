@@ -15,9 +15,9 @@ namespace SchoolERP.Models.Entities
         public string Name { get; set; } = string.Empty;
         public string Class { get; set; } = string.Empty;
         public string Sec { get; set; } = string.Empty;
-        public Gender Gender { get; set; } // Direct Enum Type
+        public Gender Gender { get; set; } 
         public DateOnly DOB { get; set; }
-        public BloodGroup BloodGrp { get; set; } // Direct Enum Type
+        public BloodGroup BloodGrp { get; set; } 
         public string PhotoUrl { get; set; } = string.Empty;
         public string FatherName { get; set; } = string.Empty;
         public string MotherName { get; set; } = string.Empty;

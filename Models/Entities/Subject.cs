@@ -9,7 +9,6 @@ namespace SchoolERP.Models.Entities
         public string SubjectName { get; set; } = string.Empty;
         public string TeacherId { get; set; } = string.Empty;
 
-        // Navigation
         public StudentClass? StudentClass { get; set; }
         public Teacher? Teacher { get; set; }
     }

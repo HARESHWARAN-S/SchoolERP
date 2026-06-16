@@ -2,7 +2,6 @@ using SchoolERP.Models.Enums;
 
 namespace SchoolERP.Models.DTOs
 {
-    // Admin Creates Teacher
     public class CreateTeacherDto
     {
         public string Name { get; set; } = string.Empty;

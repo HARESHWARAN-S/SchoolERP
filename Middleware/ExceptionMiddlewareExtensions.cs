@@ -45,6 +45,7 @@ namespace SchoolERP.Middleware
                         MarkListStrengthMismatchException               => 400,
                         MarksOutOfRangeException                        => 400,
                         MarksAlreadyEnteredForExamException             => 409,
+                        AdminAttendanceAlreadyMarkedException           => 409,
                         _                                               => 500
                     };
 

@@ -10,7 +10,6 @@ namespace SchoolERP.Models.Entities
         public string ClassTeacherId { get; set; } = string.Empty;
         public int ClassStrength { get; set; } = 0;
 
-        // Navigation
         public Teacher? ClassTeacher { get; set; }
     }
 }

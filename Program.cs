@@ -34,6 +34,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IStudentAttendanceRepository, StudentAttendanceRepository>();
 builder.Services.AddScoped<IMarkRepository, MarkRepository>();
+builder.Services.AddScoped<IAdminAttendanceRepository, AdminAttendanceRepository>();
 
 // Services
 builder.Services.AddScoped<ILoginService, LoginService>();

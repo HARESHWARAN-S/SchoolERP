@@ -19,14 +19,12 @@ namespace SchoolERP.Middleware
                 await _next(context);
                 return;
             }
-            // Extract token from Authorization header
             string? authHeader = context.Request.Headers["Authorization"];
 
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
                 string token = authHeader.Substring("Bearer ".Length).Trim();
 
-                // Check if token is blacklisted
                 bool isBlacklisted = await blacklistRepo.IsBlacklistedAsync(token);
 
                 if (isBlacklisted)
@@ -38,11 +36,11 @@ namespace SchoolERP.Middleware
                         statusCode = 401,
                         error = "Token has been invalidated. Please login again."
                     });
-                    return; // ← stop the request here
+                    return;
                 }
             }
 
-            await _next(context); // ← continue if token is valid
+            await _next(context); 
         }
     }
 }

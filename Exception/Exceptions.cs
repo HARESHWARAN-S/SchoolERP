@@ -178,4 +178,10 @@ namespace SchoolERP.Exceptions
         public MarksAlreadyEnteredForExamException(string examName, string subject, string Class, string sec)
             : base($"Marks for exam '{examName}' subject '{subject}' in class '{Class}-{sec}' already entered") { }
     }
+
+    public class AdminAttendanceAlreadyMarkedException : Exception
+    {
+        public AdminAttendanceAlreadyMarkedException(string adminId, DateOnly date)
+            : base($"Attendance for admin '{adminId}' on '{date}' is already marked") { }
+    }
 }

@@ -107,22 +107,18 @@ namespace SchoolERP.Services
 
         public async Task<List<StudentHomeworkResponseDto>> GetHomeworkAsync(string admnNo)
         {
-            // Check student exists
             var student = await _studentRepo.GetByIdAsync(admnNo);
             if (student == null)
                 throw new StudentNotFoundException(admnNo);
 
-            // Check student is active
             var status = await _loginRepo.GetStatusAsync(admnNo);
             if (status == UserStatus.Inactive)
                 throw new UserInactiveException(admnNo);
 
-            // Get homework for student's class and sec
             var homeworks = await _homeworkRepo.GetByClassAsync(student.Class, student.Sec);
 
             await _logRepo.AddAsync($"Student '{admnNo}' viewed homework");
 
-            // Return only date, subject, description
             return homeworks.Select(h => new StudentHomeworkResponseDto
             {
                 Date = h.Date,
@@ -133,12 +129,10 @@ namespace SchoolERP.Services
 
         public async Task<bool> AssignRollNumbersAsync(string Class, string sec)
         {
-            // Check class exists
             var studentClass = await _studentClassRepo.GetAsync(Class, sec);
             if (studentClass == null)
                 throw new StudentClassNotFoundException(Class, sec);
 
-            // Get all active students in this class (rollNo != -1)
             var students = await _studentRepo.GetByClassAsync(Class, sec);
 
             if (!students.Any())
@@ -146,7 +140,6 @@ namespace SchoolERP.Services
                 throw new Exception($"No active students found in class '{Class}-{sec}'");
             }
 
-            // Sort by name ascending and assign roll numbers from 1
             var sortedStudents = students
                 .OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -168,7 +161,6 @@ namespace SchoolERP.Services
 
         public async Task<PayFeeResponseDto> PayFeeAsync(string admnNo, int feeId)
         {
-            // Check student exists and is active
             var student = await _studentRepo.GetByIdAsync(admnNo);
             if (student == null)
                 throw new StudentNotFoundException(admnNo);
@@ -177,27 +169,21 @@ namespace SchoolERP.Services
             if (status == UserStatus.Inactive)
                 throw new UserInactiveException(admnNo);
 
-            // Check fee exists
             var fee = await _feeRepo.GetByIdAsync(feeId);
             if (fee == null)
                 throw new FeeNotFoundException(feeId);
 
-            // Check fee belongs to this student
             if (fee.AdmnNo != admnNo)
                 throw new FeeNotBelongToStudentException(feeId, admnNo);
 
-            // Check fee not already paid
             if (fee.Status == FeeStatus.Paid)
                 throw new FeeAlreadyPaidException(feeId);
 
-            // Mock Stripe payment
             string stripePaymentId = await _stripeService.MockChargeAsync(fee.Amount, admnNo, feeId);
 
-            // Mark fee as paid
             fee.Status = FeeStatus.Paid;
             await _feeRepo.UpdateAsync(fee);
 
-            // Create payment record
             var payment = new Payment
             {
                 FeeId = feeId,
@@ -269,7 +255,6 @@ namespace SchoolERP.Services
 
         public async Task<List<LeaveDetailsResponseDto>> GetLeaveDetailsAsync(string admnNo)
         {
-            // Check student exists and is active
             var student = await _studentRepo.GetByIdAsync(admnNo);
             if (student == null)
                 throw new StudentNotFoundException(admnNo);

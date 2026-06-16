@@ -9,8 +9,7 @@ namespace SchoolERP.Models.Entities
         public string AdmnNo { get; set; } = string.Empty;
         public DateOnly Date { get; set; }
         public AttendanceStatus Status { get; set; }
-
-        // Navigation
+        
         public Student? Student { get; set; }
     }
 }

@@ -14,7 +14,6 @@ namespace SchoolERP.Models.Entities
         public decimal Amount { get; set; }
         public string StripePaymentId { get; set; } = string.Empty;
 
-        // Navigation
         public Fee? Fee { get; set; }
         public Student? Student { get; set; }
     }

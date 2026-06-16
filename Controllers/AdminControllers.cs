@@ -18,8 +18,6 @@ namespace SchoolERP.Controllers
             _adminService = adminService;
         }
 
-        // ── Requires Admin JWT ────────────────────────────────────────────
-
         [HttpPost("add-admin")]
         public async Task<IActionResult> AddAdmin([FromBody] CreateAdminDto dto)
         {
@@ -82,7 +80,7 @@ namespace SchoolERP.Controllers
             var result = await _adminService.GetAllStudentsAsync();
             return Ok(result);
         }
-        // Add Notification
+
         [HttpPost("send-notification")]
         public async Task<IActionResult> AddNotification([FromBody] CreateNotificationDto dto)
         {
@@ -90,32 +88,20 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // View All Notifications
         [HttpGet("view-notifications")]
         public async Task<IActionResult> GetAllNotifications()
         {
             var result = await _adminService.GetAllNotificationsAsync();
             return Ok(result);
         }
-        // Add Student Class
+
         [HttpPost("add-class")]
         public async Task<IActionResult> AddStudentClass([FromBody] CreateStudentClassDto dto)
         {
             var result = await _adminService.AddStudentClassAsync(dto);
             return Ok(result);
         }
-        /*
-        // Remove Student Class
-        [HttpDelete("remove-class")]
-        public async Task<IActionResult> RemoveStudentClass(
-            [FromQuery] string className,
-            [FromQuery] string sec)
-        {
-            await _adminService.RemoveStudentClassAsync(className, sec);
-            return Ok($"Class '{className}-{sec}' removed successfully");
-        }*/
 
-        // Get All Classes
         [HttpGet("classes")]
         public async Task<IActionResult> GetAllStudentClasses()
         {
@@ -123,7 +109,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Assign Roll Numbers
         [HttpPut("assign-rollnumbers")]
         public async Task<IActionResult> AssignRollNumbers(
             [FromQuery] string className,
@@ -133,7 +118,6 @@ namespace SchoolERP.Controllers
             return Ok($"Roll numbers assigned successfully for class '{className}-{sec}'");
         }
 
-        // Mark Teacher Attendance
         [HttpPost("mark-teacher-attendance")]
         public async Task<IActionResult> MarkTeacherAttendance([FromBody] MarkTeacherAttendanceDto dto)
         {
@@ -141,7 +125,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Add Subject
         [HttpPost("add-subject")]
         public async Task<IActionResult> AddSubject([FromBody] CreateSubjectDto dto)
         {
@@ -149,7 +132,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Get All Subjects
         [HttpGet("subjects")]
         public async Task<IActionResult> GetAllSubjects()
         {
@@ -157,7 +139,6 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        // Get Subjects by Class
         [HttpGet("subjects/{className}/{sec}")]
         public async Task<IActionResult> GetSubjectsByClass(string className, string sec)
         {
@@ -177,6 +158,22 @@ namespace SchoolERP.Controllers
         {
             string adminId = User.FindFirstValue(ClaimTypes.Name)!; // ← from JWT token
             var result = await _adminService.GetMyProfileAsync(adminId);
+            return Ok(result);
+        }
+
+        [HttpPost("mark-my-attendance")]
+        public async Task<IActionResult> MarkMyAttendance([FromBody] MarkAdminAttendanceDto dto)
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.Name)!;
+            var result = await _adminService.MarkMyAttendanceAsync(adminId, dto);
+            return Ok(result);
+        }
+
+        [HttpGet("leave-details")]
+        public async Task<IActionResult> GetMyLeaveDetails()
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.Name)!;
+            var result = await _adminService.GetMyLeaveDetailsAsync(adminId);
             return Ok(result);
         }
     }

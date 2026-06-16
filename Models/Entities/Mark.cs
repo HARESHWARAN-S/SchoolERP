@@ -17,7 +17,6 @@ namespace SchoolERP.Models.Entities
         public decimal MarksObtained { get; set; }
         public decimal TotalMarks { get; set; }
 
-        // Navigation
         public Student? Student { get; set; }
     }
 }

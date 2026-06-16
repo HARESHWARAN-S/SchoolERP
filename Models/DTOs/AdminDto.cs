@@ -2,7 +2,6 @@ using SchoolERP.Models.Enums;
 
 namespace SchoolERP.Models.DTOs
 {
-    // First Admin Creation
     public class CreateFirstAdminDto
     {
         public string AdminName { get; set; } = string.Empty;
@@ -14,7 +13,6 @@ namespace SchoolERP.Models.DTOs
         public string Password { get; set; } = string.Empty;
     }
 
-    // New Admin Added By Existing Admin
     public class CreateAdminDto
     {
         public string AdminName { get; set; } = string.Empty;

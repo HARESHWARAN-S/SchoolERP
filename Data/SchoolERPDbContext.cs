@@ -25,12 +25,12 @@ namespace SchoolERP.Contexts
         public DbSet<Payment> Payments { get; set; }
         public DbSet<StudentAttendance> StudentAttendances { get; set; }
         public DbSet<Mark> Marks { get; set; }
+        public DbSet<AdminAttendance> AdminAttendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // DateOnly converter for InMemoryDatabase compatibility
             var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
                 d => d.ToDateTime(TimeOnly.MinValue),
                 d => DateOnly.FromDateTime(d));
@@ -40,7 +40,6 @@ namespace SchoolERP.Contexts
                 d => d.GetHashCode(),
                 d => d);
 
-            // Apply to all DateOnly properties
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 foreach (var property in entityType.GetProperties())
@@ -60,7 +59,6 @@ namespace SchoolERP.Contexts
                 }
             }
 
-            // Composite Primary Key
             modelBuilder.Entity<StudentClass>()
                 .HasKey(sc => new { sc.Class, sc.Sec });
             modelBuilder.Entity<TeacherAttendance>()
@@ -69,8 +67,9 @@ namespace SchoolERP.Contexts
                 .HasKey(s => new { s.Class, s.Sec, s.SubjectName });
             modelBuilder.Entity<StudentAttendance>()
                 .HasKey(sa => new { sa.AdmnNo, sa.Date });
+            modelBuilder.Entity<AdminAttendance>()
+                .HasKey(aa => new { aa.AdminId, aa.Date });
 
-            // Decimal Precision
             modelBuilder.Entity<Admin>()
                 .Property(a => a.AttendancePercentage).HasPrecision(5, 2);
             modelBuilder.Entity<Teacher>()
@@ -79,17 +78,13 @@ namespace SchoolERP.Contexts
                 .Property(s => s.AttendancePercentage).HasPrecision(5, 2);
             modelBuilder.Entity<Fee>()
                 .Property(f => f.Amount).HasPrecision(10, 2);
-
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Amount).HasPrecision(10, 2);
             modelBuilder.Entity<Mark>()
                 .Property(m => m.MarksObtained).HasPrecision(6, 2);
-
             modelBuilder.Entity<Mark>()
                 .Property(m => m.TotalMarks).HasPrecision(6, 2);
 
-
-            // Enums as strings
             modelBuilder.Entity<Login>()
                 .Property(l => l.Role).HasConversion<string>();
             modelBuilder.Entity<Login>()
@@ -112,8 +107,9 @@ namespace SchoolERP.Contexts
                 .Property(f => f.Status).HasConversion<string>();
             modelBuilder.Entity<StudentAttendance>()
                 .Property(sa => sa.Status).HasConversion<string>();
+            modelBuilder.Entity<AdminAttendance>()
+                .Property(aa => aa.Status).HasConversion<string>();
 
-            // Relationships
             modelBuilder.Entity<Admin>()
                 .HasOne(a => a.Login)
                 .WithOne(l => l.Admin)
@@ -134,25 +130,21 @@ namespace SchoolERP.Contexts
                 .WithOne()
                 .HasForeignKey<StudentClass>(sc => sc.ClassTeacherId);
             
-            // Fee -> Student
             modelBuilder.Entity<Fee>()
                 .HasOne(f => f.Student)
                 .WithMany()
                 .HasForeignKey(f => f.AdmnNo);
 
-            // Payment -> Fee
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Fee)
                 .WithMany()
                 .HasForeignKey(p => p.FeeId);
 
-            // Payment -> Student
             modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Student)
                 .WithMany()
                 .HasForeignKey(p => p.AdmnNo);
 
-            // Enum conversions if needed
             modelBuilder.Entity<StudentClass>()
                 .Property(sc => sc.ClassTeacherId)
                 .IsRequired();
@@ -161,14 +153,12 @@ namespace SchoolERP.Contexts
                 .HasOne(ta => ta.Teacher)
                 .WithMany()
                 .HasForeignKey(ta => ta.TeacherId);
-            
-            // Subject -> StudentClass
+
             modelBuilder.Entity<Subject>()
                 .HasOne(s => s.StudentClass)
                 .WithMany()
                 .HasForeignKey(s => new { s.Class, s.Sec });
 
-            // Subject -> Teacher
             modelBuilder.Entity<Subject>()
                 .HasOne(s => s.Teacher)
                 .WithMany()
@@ -188,6 +178,11 @@ namespace SchoolERP.Contexts
                 .HasOne(m => m.Student)
                 .WithMany()
                 .HasForeignKey(m => m.AdmnNo);
+
+            modelBuilder.Entity<AdminAttendance>()
+                .HasOne(aa => aa.Admin)
+                .WithMany()
+                .HasForeignKey(aa => aa.AdminId);
         }
     }
 }
