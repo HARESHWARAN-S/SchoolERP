@@ -9,5 +9,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task<string> GetNextTeacherIdAsync();
         Task AddAsync(Teacher teacher);
         Task UpdateAsync(Teacher teacher);
+        Task<List<Teacher>> GetActiveTeachersAsync();
     }
 }

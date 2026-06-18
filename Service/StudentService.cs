@@ -203,6 +203,7 @@ namespace SchoolERP.Services
                 FeeId = savedPayment.FeeId,
                 AdmnNo = savedPayment.AdmnNo,
                 Date = savedPayment.Date,
+                Amount = fee.Amount,
                 StripePaymentId = savedPayment.StripePaymentId
             };
         }

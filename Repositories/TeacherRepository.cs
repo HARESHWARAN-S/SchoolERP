@@ -52,5 +52,17 @@ namespace SchoolERP.Repositories
             _context.Teachers.Update(teacher);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Teacher>> GetActiveTeachersAsync()
+        {
+            return await _context.Teachers
+                .Join(_context.Logins,
+                    t => t.TeacherId,
+                    l => l.Username,
+                    (t, l) => new { Teacher = t, Login = l })
+                .Where(x => x.Login.Status == UserStatus.Active)
+                .Select(x => x.Teacher)
+                .ToListAsync();
+        }
     }
 }

@@ -186,7 +186,7 @@ namespace SchoolERP.Services
 
         public async Task<List<TeacherListDto>> GetAllTeachersAsync()
         {
-            var teachers = await _teacherRepo.GetAllAsync();
+            var teachers = await _teacherRepo.GetActiveTeachersAsync();
             return teachers.Select(t => new TeacherListDto
             {
                 TeacherId = t.TeacherId,
@@ -274,7 +274,7 @@ namespace SchoolERP.Services
 
         public async Task<List<StudentListDto>> GetAllStudentsAsync()
         {
-            var students = await _studentRepo.GetAllAsync();
+            var students = await _studentRepo.GetActiveStudentsAsync();
             return students.Select(s => new StudentListDto
             {
                 AdmnNo = s.AdmnNo,

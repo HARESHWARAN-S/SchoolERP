@@ -95,5 +95,17 @@ namespace SchoolERP.Repositories
                     s.Sec == sec &&
                     s.RollNo == rollNo);
         }
+
+        public async Task<List<Student>> GetActiveStudentsAsync()
+        {
+            return await _context.Students
+                .Join(_context.Logins,
+                    s => s.AdmnNo,
+                    l => l.Username,
+                    (s, l) => new { Student = s, Login = l })
+                .Where(x => x.Login.Status == UserStatus.Active)
+                .Select(x => x.Student)
+                .ToListAsync();
+        }
     }
 }
