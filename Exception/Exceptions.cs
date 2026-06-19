@@ -207,4 +207,16 @@ namespace SchoolERP.Exceptions
         public SameTimeTableException(string url)
             : base($"Timetable URL '{url}' is same as previous one please recheck again") { }
     }
+
+    public class DuplicateContactNoException : Exception
+    {
+        public DuplicateContactNoException(string contactNo)
+            : base($"Contact number '{contactNo}' is already in use by another active teacher or admin") { }
+    }
+
+    public class StudentContactMismatchException : Exception
+    {
+        public StudentContactMismatchException(string contactNo)
+            : base($"Contact number '{contactNo}' is already used by a student with a different father/mother name") { }
+    }
 }

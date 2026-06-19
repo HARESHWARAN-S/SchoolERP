@@ -127,6 +127,14 @@ namespace SchoolERP.Services
 
         public async Task<TeacherResponseDto> AddTeacherAsync(CreateTeacherDto dto)
         {
+            bool contactExistsInTeachers = await _teacherRepo.ExistsActiveByContactNoAsync(dto.ContactNo);
+            if (contactExistsInTeachers)
+                throw new DuplicateContactNoException(dto.ContactNo);
+
+            var adminContact = await _adminRepo.GetActiveAdminContactAsync();
+            if (adminContact != null && adminContact == dto.ContactNo)
+                throw new DuplicateContactNoException(dto.ContactNo);
+
             string teacherId = await _teacherRepo.GetNextTeacherIdAsync();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
@@ -208,6 +216,17 @@ namespace SchoolERP.Services
             var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
             if (studentClass == null)
                 throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+
+            var existingStudents = await _studentRepo.GetStudentsByContactNoAsync(dto.ContactNo);
+            if (existingStudents.Any())
+            {
+                bool isSibling = existingStudents.All(s =>
+                    s.FatherName.ToLower() == dto.FatherName.ToLower() &&
+                    s.MotherName.ToLower() == dto.MotherName.ToLower());
+
+                if (!isSibling)
+                    throw new StudentContactMismatchException(dto.ContactNo);
+            }
 
             string admnNo = await _studentRepo.GetNextStudentIdAsync();
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -782,9 +801,9 @@ namespace SchoolERP.Services
             if (teacher == null)
                 throw new TeacherNotFoundException(dto.TeacherId);
             
-            var status = await _loginRepo.GetStatusAsync(admnNo);
+            var status = await _loginRepo.GetStatusAsync(dto.TeacherId);
             if (status == UserStatus.Inactive)
-                throw new UserInactiveException(admnNo);
+                throw new UserInactiveException(dto.TeacherId);
 
             bool urlExists = await _teacherRepo.ExistsByTimetableAsync(dto.TimeTableUrl);
             if (urlExists && teacher.TimeTableUrl != dto.TimeTableUrl)

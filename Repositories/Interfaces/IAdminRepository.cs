@@ -10,5 +10,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task<string> GetNextAdminIdAsync();
         Task AddAsync(Admin admin);
         Task UpdateAsync(Admin admin);
+        Task<string?> GetActiveAdminContactAsync();
     }
 }

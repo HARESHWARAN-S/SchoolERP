@@ -60,5 +60,13 @@ namespace SchoolERP.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<string?> GetActiveAdminContactAsync()
+        {
+            var admin = await _context.Admins
+                .Include(a => a.Login)
+                .FirstOrDefaultAsync(a => a.Login.Status == UserStatus.Active);
+            return admin?.ContactNo;
+        }
+
     }
 }

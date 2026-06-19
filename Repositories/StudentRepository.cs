@@ -107,5 +107,12 @@ namespace SchoolERP.Repositories
                 .Select(x => x.Student)
                 .ToListAsync();
         }
+
+        public async Task<List<Student>> GetStudentsByContactNoAsync(string contactNo)
+        {
+            return await _context.Students
+                .Where(s => s.ContactNo == contactNo)
+                .ToListAsync();
+        }
     }
 }

@@ -50,6 +50,8 @@ namespace SchoolERP.Middleware
                         ClassTimetableAlreadyExistsException            => 409,
                         TeacherTimetableAlreadyExistsException          => 409,
                         SameTimeTableException                          => 409,
+                        DuplicateContactNoException                     => 409,
+                        StudentContactMismatchException                 => 409,
                         _                                               => 500
                     };
 

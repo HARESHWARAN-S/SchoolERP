@@ -70,5 +70,15 @@ namespace SchoolERP.Repositories
             return await _context.Teachers
                 .AnyAsync(t => t.TimeTableUrl == timetableUrl);
         }
+
+        public async Task<bool> ExistsActiveByContactNoAsync(string contactNo)
+        {
+            return await _context.Teachers
+                .Join(_context.Logins,
+                    t => t.TeacherId,
+                    l => l.Username,
+                    (t, l) => new { Teacher = t, Login = l })
+                .AnyAsync(x => x.Teacher.ContactNo == contactNo && x.Login.Status == UserStatus.Active);
+        }
     }
 }
