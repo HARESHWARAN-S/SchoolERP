@@ -11,5 +11,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task DeleteAsync(StudentClass studentClass);
         Task<StudentClass?> GetByClassTeacherIdAsync(string teacherId);
         Task UpdateAsync(StudentClass studentClass);
+        Task<bool> ExistsByTimetableAsync(string timetableUrl);
     }
 }

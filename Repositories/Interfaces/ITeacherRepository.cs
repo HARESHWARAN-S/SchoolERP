@@ -10,5 +10,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task AddAsync(Teacher teacher);
         Task UpdateAsync(Teacher teacher);
         Task<List<Teacher>> GetActiveTeachersAsync();
+        Task<bool> ExistsByTimetableAsync(string timetableUrl);
     }
 }

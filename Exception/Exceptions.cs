@@ -190,4 +190,21 @@ namespace SchoolERP.Exceptions
         public MarkRecordNotFoundException(int rollNo, string examName, string subject, string Class, string sec)
             : base($"Mark record not found for roll no '{rollNo}' exam '{examName}' subject '{subject}' class '{Class}-{sec}'") { }
     }
+        public class ClassTimetableAlreadyExistsException : Exception
+    {
+        public ClassTimetableAlreadyExistsException(string url)
+            : base($"Timetable URL '{url}' is already assigned to another class") { }
+    }
+
+    public class TeacherTimetableAlreadyExistsException : Exception
+    {
+        public TeacherTimetableAlreadyExistsException(string url)
+            : base($"Timetable URL '{url}' is already assigned to another teacher") { }
+    }
+
+    public class SameTimeTableException : Exception
+    {
+        public SameTimeTableException(string url)
+            : base($"Timetable URL '{url}' is same as previous one please recheck again") { }
+    }
 }

@@ -58,5 +58,11 @@ namespace SchoolERP.Repositories
             _context.StudentClasses.Update(studentClass);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsByTimetableAsync(string timetableUrl)
+        {
+            return await _context.StudentClasses
+                .AnyAsync(sc => sc.ClassTimetable == timetableUrl);
+        }
     }
 }

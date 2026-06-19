@@ -46,4 +46,10 @@ namespace SchoolERP.Models.DTOs
         public string Name { get; set; } = string.Empty;
         public string ContactNo { get; set; } = string.Empty;
     }
+
+    public class UpdateTeacherTimetableDto
+    {
+        public string TeacherId { get; set; } = string.Empty;
+        public string TimeTableUrl { get; set; } = string.Empty;
+    }
 }

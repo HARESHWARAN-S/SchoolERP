@@ -27,5 +27,7 @@ namespace SchoolERP.Services.Interfaces
         Task<AdminProfileResponseDto> GetMyProfileAsync(string adminId);
         Task<AdminAttendanceResponseDto> MarkMyAttendanceAsync(string adminId, MarkAdminAttendanceDto dto);
         Task<List<AdminLeaveDetailsResponseDto>> GetMyLeaveDetailsAsync(string adminId);
+        Task<StudentClassResponseDto> UpdateClassTimetableAsync(UpdateClassTimetableDto dto);
+        Task<TeacherResponseDto> UpdateTeacherTimetableAsync(UpdateTeacherTimetableDto dto);
     }
 }

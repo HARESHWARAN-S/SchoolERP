@@ -64,5 +64,8 @@ namespace SchoolERP.Models.DTOs
         public BloodGroup BloodGrp { get; set; }
         public string ContactNo { get; set; } = string.Empty;
         public string PhotoUrl { get; set; } = string.Empty;
+        public int TotalDays { get; set; }     
+        public int PresentDays { get; set; }     
+        public decimal AttendancePercentage { get; set; } 
     }
 }

@@ -176,5 +176,19 @@ namespace SchoolERP.Controllers
             var result = await _adminService.GetMyLeaveDetailsAsync(adminId);
             return Ok(result);
         }
+
+        [HttpPut("update-class-timetable")]
+        public async Task<IActionResult> UpdateClassTimetable([FromBody] UpdateClassTimetableDto dto)
+        {
+            var result = await _adminService.UpdateClassTimetableAsync(dto);
+            return Ok(result);
+        }
+
+        [HttpPut("update-teacher-timetable")]
+        public async Task<IActionResult> UpdateTeacherTimetable([FromBody] UpdateTeacherTimetableDto dto)
+        {
+            var result = await _adminService.UpdateTeacherTimetableAsync(dto);
+            return Ok(result);
+        }
     }
 }

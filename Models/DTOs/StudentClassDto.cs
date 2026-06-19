@@ -19,4 +19,11 @@ namespace SchoolERP.Models.DTOs
         public string ClassTeacherName { get; set; } = string.Empty;
         public int ClassStrength { get; set; }
     }
+
+    public class UpdateClassTimetableDto
+    {
+        public string Class { get; set; } = string.Empty;
+        public string Sec { get; set; } = string.Empty;
+        public string ClassTimetable { get; set; } = string.Empty;
+    }
 }

@@ -163,6 +163,10 @@ namespace SchoolERP.Services
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
 
+            var status = await _loginRepo.GetStatusAsync(teacherId);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(teacherId);
+
             var login = await _loginRepo.GetByUsernameAsync(teacherId);
             if (login == null)
                 throw new UserNotFoundException(teacherId);
@@ -180,6 +184,10 @@ namespace SchoolERP.Services
             var teacher = await _teacherRepo.GetByIdAsync(teacherId);
             if (teacher == null)
                 throw new TeacherNotFoundException(teacherId);
+
+            var status = await _loginRepo.GetStatusAsync(teacherId);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(teacherId);
 
             return MapToTeacherResponse(teacher);
         }
@@ -249,6 +257,10 @@ namespace SchoolERP.Services
             if (login == null)
                 throw new UserNotFoundException(admnNo);
 
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
+
             login.Status = UserStatus.Inactive;
             student.RollNo = -1;
 
@@ -268,6 +280,10 @@ namespace SchoolERP.Services
             var student = await _studentRepo.GetByIdAsync(admnNo);
             if (student == null)
                 throw new StudentNotFoundException(admnNo);
+
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
 
             return MapToStudentResponse(student);
         }
@@ -383,6 +399,10 @@ namespace SchoolERP.Services
 
             var teacherStatus = await _loginRepo.GetStatusAsync(dto.ClassTeacherId);
             if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.ClassTeacherId);
+
+            var status = await _loginRepo.GetStatusAsync(dto.ClassTeacherId);
+            if (status == UserStatus.Inactive)
                 throw new UserInactiveException(dto.ClassTeacherId);
 
             var alreadyAssigned = await _studentClassRepo.GetByTeacherIdAsync(dto.ClassTeacherId);
@@ -648,34 +668,32 @@ namespace SchoolERP.Services
                 Gender = admin.Gender,
                 BloodGrp = admin.BloodGrp,
                 ContactNo = admin.ContactNo,
-                PhotoUrl = admin.PhotoUrl
+                PhotoUrl = admin.PhotoUrl,
+                TotalDays = admin.TotalDays,                      
+                PresentDays = admin.PresentDays,                   
+                AttendancePercentage = admin.AttendancePercentage
             };
         }
 
         public async Task<AdminAttendanceResponseDto> MarkMyAttendanceAsync(
             string adminId, MarkAdminAttendanceDto dto)
         {
-            // Validate status input
             if (dto.Status != 0 && dto.Status != 1)
                 throw new InvalidAttendanceStatusException();
 
-            // Check admin exists
             var admin = await _adminRepo.GetByIdAsync(adminId);
             if (admin == null)
                 throw new AdminNotFoundException(adminId);
 
-            // Check attendance not already marked today
             DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
             var existing = await _adminAttendanceRepo.GetAsync(adminId, today);
             if (existing != null)
                 throw new AdminAttendanceAlreadyMarkedException(adminId, today);
 
-            // Map 0/1 to enum
             AttendanceStatus status = dto.Status == 1
                 ? AttendanceStatus.Present
                 : AttendanceStatus.Absent;
 
-            // Save attendance record
             var attendance = new AdminAttendance
             {
                 AdminId = adminId,
@@ -684,7 +702,6 @@ namespace SchoolERP.Services
             };
             await _adminAttendanceRepo.AddAsync(attendance);
 
-            // Update admin stats
             admin.TotalDays += 1;
             if (status == AttendanceStatus.Present)
             {
@@ -710,7 +727,6 @@ namespace SchoolERP.Services
 
         public async Task<List<AdminLeaveDetailsResponseDto>> GetMyLeaveDetailsAsync(string adminId)
         {
-            // Check admin exists
             var admin = await _adminRepo.GetByIdAsync(adminId);
             if (admin == null)
                 throw new AdminNotFoundException(adminId);
@@ -723,6 +739,81 @@ namespace SchoolERP.Services
             {
                 Date = a.Date
             }).ToList();
+        }
+
+        public async Task<StudentClassResponseDto> UpdateClassTimetableAsync(UpdateClassTimetableDto dto)
+        {
+            var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
+            if (studentClass == null)
+                throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+
+            bool urlExists = await _studentClassRepo.ExistsByTimetableAsync(dto.ClassTimetable);
+            if (urlExists && studentClass.ClassTimetable != dto.ClassTimetable)
+                throw new ClassTimetableAlreadyExistsException(dto.ClassTimetable);
+
+            if(studentClass.ClassTimetable == dto.ClassTimetable)
+            {
+                throw new SameTimeTableException(dto.ClassTimetable);
+            }
+
+            studentClass.ClassTimetable = dto.ClassTimetable;
+            await _studentClassRepo.UpdateAsync(studentClass);
+
+            await _logRepo.AddAsync(
+                $"Admin updated timetable for class '{dto.Class}-{dto.Sec}'");
+
+            var teacher = await _teacherRepo.GetByIdAsync(studentClass.ClassTeacherId);
+
+            return new StudentClassResponseDto
+            {
+                Class = studentClass.Class,
+                Sec = studentClass.Sec,
+                ClassTimetable = studentClass.ClassTimetable,
+                ClassTeacherId = studentClass.ClassTeacherId,
+                ClassTeacherName = teacher?.Name ?? "Unknown",
+                //SubjectName = "",
+                ClassStrength = studentClass.ClassStrength
+            };
+        }
+
+        public async Task<TeacherResponseDto> UpdateTeacherTimetableAsync(UpdateTeacherTimetableDto dto)
+        {
+            var teacher = await _teacherRepo.GetByIdAsync(dto.TeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.TeacherId);
+            
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
+
+            bool urlExists = await _teacherRepo.ExistsByTimetableAsync(dto.TimeTableUrl);
+            if (urlExists && teacher.TimeTableUrl != dto.TimeTableUrl)
+                throw new TeacherTimetableAlreadyExistsException(dto.TimeTableUrl);
+
+            if(teacher.TimeTableUrl == dto.TimeTableUrl)
+            {
+                throw new SameTimeTableException(dto.TimeTableUrl);
+            }
+            teacher.TimeTableUrl = dto.TimeTableUrl;
+            await _teacherRepo.UpdateAsync(teacher);
+
+            await _logRepo.AddAsync(
+                $"Admin updated timetable for teacher '{dto.TeacherId}'");
+
+            return new TeacherResponseDto
+            {
+                TeacherId = teacher.TeacherId,
+                Name = teacher.Name,
+                DOB = teacher.DOB,
+                Gender = teacher.Gender,
+                BloodGrp = teacher.BloodGrp,
+                ContactNo = teacher.ContactNo,
+                PhotoUrl = teacher.PhotoUrl,
+                TimeTableUrl = teacher.TimeTableUrl,
+                TotalDays = teacher.TotalDays,
+                PresentDays = teacher.PresentDays,
+                AttendancePercentage = teacher.AttendancePercentage
+            };
         }
     }
 }

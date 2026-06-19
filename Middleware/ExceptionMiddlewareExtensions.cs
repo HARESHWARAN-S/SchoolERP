@@ -47,6 +47,9 @@ namespace SchoolERP.Middleware
                         MarksAlreadyEnteredForExamException             => 409,
                         AdminAttendanceAlreadyMarkedException           => 409,
                         MarkRecordNotFoundException                     => 404,
+                        ClassTimetableAlreadyExistsException            => 409,
+                        TeacherTimetableAlreadyExistsException          => 409,
+                        SameTimeTableException                          => 409,
                         _                                               => 500
                     };
 

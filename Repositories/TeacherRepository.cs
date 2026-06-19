@@ -64,5 +64,11 @@ namespace SchoolERP.Repositories
                 .Select(x => x.Teacher)
                 .ToListAsync();
         }
+
+        public async Task<bool> ExistsByTimetableAsync(string timetableUrl)
+        {
+            return await _context.Teachers
+                .AnyAsync(t => t.TimeTableUrl == timetableUrl);
+        }
     }
 }
