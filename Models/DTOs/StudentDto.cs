@@ -4,7 +4,7 @@ namespace SchoolERP.Models.DTOs
 {
     public class CreateStudentDto
     {
-        public int RollNo { get; set; }
+        //public int RollNo { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Class { get; set; } = string.Empty;
         public string Sec { get; set; } = string.Empty;

@@ -243,7 +243,7 @@ namespace SchoolERP.Services
             var student = new Student
             {
                 AdmnNo = admnNo,
-                RollNo = dto.RollNo,
+                RollNo = 0,
                 Name = dto.Name,
                 Class = dto.Class,
                 Sec = dto.Sec,
