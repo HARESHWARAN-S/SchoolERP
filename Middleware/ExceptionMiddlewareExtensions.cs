@@ -52,6 +52,7 @@ namespace SchoolERP.Middleware
                         SameTimeTableException                          => 409,
                         DuplicateContactNoException                     => 409,
                         StudentContactMismatchException                 => 409,
+                        NoActiveClassForCurrentYearException            => 404,
                         _                                               => 500
                     };
 

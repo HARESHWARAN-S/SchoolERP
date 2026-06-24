@@ -89,5 +89,29 @@ namespace SchoolERP.Controllers
             var result = await _teacherService.UpdateMarksAsync(teacherId, dto);
             return Ok(result);
         }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangeMyPasswordDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            await _loginService.ChangeMyPasswordAsync(teacherId, dto.NewPassword);
+            return Ok("Password changed successfully");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            string teacherId = GetCurrentUserId();
+            string token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "")
+                .Trim();
+            await _loginService.LogoutAsync(teacherId, token);
+            return Ok(new
+            {
+                statusCode = 200,
+                message = "Logged out successfully. Please login again."
+            });
+        }
     }
 }

@@ -219,4 +219,9 @@ namespace SchoolERP.Exceptions
         public StudentContactMismatchException(string contactNo)
             : base($"Contact number '{contactNo}' is already used by a student with a different father/mother name") { }
     }
+    public class NoActiveClassForCurrentYearException : Exception
+    {
+        public NoActiveClassForCurrentYearException(string Class, string sec, string academicYear)
+            : base($"No active class found for '{Class}-{sec}' in academic year '{academicYear}'") { }
+    }
 }

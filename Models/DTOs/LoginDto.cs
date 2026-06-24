@@ -26,4 +26,11 @@ namespace SchoolERP.Models.DTOs
 
         public string NewPassword { get; set; } = string.Empty;
     }
+
+    
+    public class ChangeMyPasswordDto
+    {
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
 }

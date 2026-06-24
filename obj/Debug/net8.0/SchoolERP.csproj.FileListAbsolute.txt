@@ -1,3 +1,11 @@
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.csproj.AssemblyReference.cache
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.AssemblyInfoInputs.cache
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.AssemblyInfo.cs
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.csproj.CoreCompileInputs.cache
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.sourcelink.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\appsettings.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\SchoolERP.exe
@@ -91,14 +99,6 @@ C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolE
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.csproj.AssemblyReference.cache
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.AssemblyInfoInputs.cache
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.AssemblyInfo.cs
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.csproj.CoreCompileInputs.cache
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\SchoolERP.sourcelink.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\HP\Desktop\Presidio\Genspark_Training\C#\Weekend Project\Trying\SchoolERP\obj\Debug\net8.0\staticwebassets\msbuild.SchoolERP.Microsoft.AspNetCore.StaticWebAssets.props

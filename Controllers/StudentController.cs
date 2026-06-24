@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolERP.Services.Interfaces;
+using SchoolERP.Models.DTOs;
 using System.Security.Claims;
 
 namespace SchoolERP.Controllers
@@ -94,6 +95,30 @@ namespace SchoolERP.Controllers
             string admnNo = GetCurrentUserId();
             var result = await _studentService.GetMarksAsync(admnNo);
             return Ok(result);
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangeMyPasswordDto dto)
+        {
+            string admnNo = GetCurrentUserId();
+            await _loginService.ChangeMyPasswordAsync(admnNo, dto.NewPassword);
+            return Ok("Password changed successfully");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            string admnNo = GetCurrentUserId();
+            string token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "")
+                .Trim();
+            await _loginService.LogoutAsync(admnNo, token);
+            return Ok(new
+            {
+                statusCode = 200,
+                message = "Logged out successfully. Please login again."
+            });
         }
     }
 }

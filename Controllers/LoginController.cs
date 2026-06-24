@@ -43,26 +43,5 @@ namespace SchoolERP.Controllers
             return Ok("Password changed successfully");
         }
 
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout()
-        {
-            string username = User.FindFirstValue(ClaimTypes.Name)!;
-
-            string token = Request.Headers["Authorization"]
-                .ToString()
-                .Replace("Bearer ", "")
-                .Trim();
-
-            await _loginService.LogoutAsync(username, token);
-            Response.Headers["Authorization"] = "";
-            Response.Headers["WWW-Authenticate"] = "Bearer";
-
-            return Unauthorized(new
-            {
-                statusCode = 401,
-                message = "Logged out successfully. Please login again."
-            });
-        }
     }
 }

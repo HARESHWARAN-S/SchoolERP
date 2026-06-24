@@ -114,5 +114,21 @@ namespace SchoolERP.Services
 
             await _logRepo.AddAsync($"User '{username}' logged out");
         }
+
+        public async Task ChangeMyPasswordAsync(string username, string newPassword)
+        {
+            var login = await _loginRepo.GetByUsernameAsync(username);
+            if (login == null)
+                throw new UserNotFoundException(username);
+
+            // Check new password is not same as current
+            if (BCrypt.Net.BCrypt.Verify(newPassword, login.PasswordHash))
+                throw new SamePasswordException();
+
+            login.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _loginRepo.UpdateAsync(login);
+
+            await _logRepo.AddAsync($"User '{username}' changed their password");
+        }
     }
 }

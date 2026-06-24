@@ -294,6 +294,53 @@ namespace SchoolERP.Services
             return true;
         }
 
+        
+        /*public async Task<bool> UpdateStudentAsync(string admnNo, string Class, string sec)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            var login = await _loginRepo.GetByUsernameAsync(admnNo);
+            if (login == null)
+                throw new UserNotFoundException(admnNo);
+
+            var status = await _loginRepo.GetStatusAsync(admnNo);
+            if (status == UserStatus.Inactive)
+                throw new UserInactiveException(admnNo);
+
+            // No changes needed
+            if (student.Class == Class && student.Sec == sec)
+                return true;
+
+            // Old class
+            var oldClass = await _studentClassRepo.GetAsync(student.Class, student.Sec);
+            if (oldClass != null)
+            {
+                oldClass.ClassStrength--;
+                await _studentClassRepo.UpdateAsync(oldClass);
+            }
+
+            // New class
+            var newClass = await _studentClassRepo.GetAsync(Class, sec);
+            if (newClass == null)
+                throw new ClassNotFoundException(Class, sec);
+
+            // Update student
+            student.Class = Class;
+            student.Sec = sec;
+
+            newClass.ClassStrength++;
+            await _studentClassRepo.UpdateAsync(newClass);
+
+            await _studentRepo.UpdateAsync(student);
+
+            await _logRepo.AddAsync(
+                $"Admin updated student '{admnNo}' from {oldClass?.Class}-{oldClass?.Sec} to {Class}-{sec}");
+
+            return true;
+        }*/
+
         public async Task<StudentResponseDto> GetStudentAsync(string admnNo)
         {
             var student = await _studentRepo.GetByIdAsync(admnNo);

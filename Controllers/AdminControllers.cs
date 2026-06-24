@@ -12,10 +12,13 @@ namespace SchoolERP.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly ILoginService _loginService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService,
+        ILoginService loginService)
         {
             _adminService = adminService;
+            _loginService = loginService;
         }
 
         [HttpPost("add-admin")]
@@ -39,14 +42,14 @@ namespace SchoolERP.Controllers
             return Ok($"Teacher '{teacherId}' removed successfully");
         }
 
-        [HttpGet("teacher/{teacherId}")]
+        [HttpGet("Get-Individual-teacher-details/{teacherId}")]
         public async Task<IActionResult> GetTeacher(string teacherId)
         {
             var result = await _adminService.GetTeacherAsync(teacherId);
             return Ok(result);
         }
 
-        [HttpGet("teachers")]
+        [HttpGet("Get-All-teachers")]
         public async Task<IActionResult> GetAllTeachers()
         {
             var result = await _adminService.GetAllTeachersAsync();
@@ -66,15 +69,22 @@ namespace SchoolERP.Controllers
             await _adminService.RemoveStudentAsync(admnNo);
             return Ok($"Student '{admnNo}' removed successfully");
         }
+        /*
+        [HttpPut("update-student/{admnNo}/{Class}/{Sec}")]
+        public async Task<IActionResult> UpdateStudent(string admnNo,string Class,string Sec)
+        {
+            await _adminService.UpdateStudentAsync(admnNo,Class,Sec);
+            return Ok($"Student '{admnNo}' updated successfully");
+        }*/
 
-        [HttpGet("student/{admnNo}")]
+        [HttpGet("Get-Individual-student-details/{admnNo}")]
         public async Task<IActionResult> GetStudent(string admnNo)
         {
             var result = await _adminService.GetStudentAsync(admnNo);
             return Ok(result);
         }
 
-        [HttpGet("students")]
+        [HttpGet("List-All-students")]
         public async Task<IActionResult> GetAllStudents()
         {
             var result = await _adminService.GetAllStudentsAsync();
@@ -102,7 +112,7 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        [HttpGet("classes")]
+        [HttpGet("Get-All-classes")]
         public async Task<IActionResult> GetAllStudentClasses()
         {
             var result = await _adminService.GetAllStudentClassesAsync();
@@ -132,14 +142,14 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
-        [HttpGet("subjects")]
+        [HttpGet("Get-All-subject-Teachers")]
         public async Task<IActionResult> GetAllSubjects()
         {
             var result = await _adminService.GetAllSubjectsAsync();
             return Ok(result);
         }
 
-        [HttpGet("subjects/{className}/{sec}")]
+        [HttpGet("Get-subject-Teachers-ByClass/{className}/{sec}")]
         public async Task<IActionResult> GetSubjectsByClass(string className, string sec)
         {
             var result = await _adminService.GetSubjectsByClassAsync(className, sec);
@@ -189,6 +199,30 @@ namespace SchoolERP.Controllers
         {
             var result = await _adminService.UpdateTeacherTimetableAsync(dto);
             return Ok(result);
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangeMyPasswordDto dto)
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.Name)!;
+            await _loginService.ChangeMyPasswordAsync(adminId, dto.NewPassword);
+            return Ok("Password changed successfully");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            string adminId = User.FindFirstValue(ClaimTypes.Name)!;
+            string token = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "")
+                .Trim();
+            await _loginService.LogoutAsync(adminId, token);
+            return Ok(new
+            {
+                statusCode = 200,
+                message = "Logged out successfully. Please login again."
+            });
         }
     }
 }
