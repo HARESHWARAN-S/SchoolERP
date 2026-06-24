@@ -20,6 +20,7 @@ namespace SchoolERP.Services
         private readonly IStripeService _stripeService;
         private readonly IStudentAttendanceRepository _studentAttendanceRepo;
         private readonly IMarkRepository _markRepo;
+        private readonly ISubjectRepository _subjectRepo;  
 
         public StudentService(
             IStudentRepository studentRepo,
@@ -32,7 +33,8 @@ namespace SchoolERP.Services
             IPaymentRepository paymentRepo,
             IStripeService stripeService,
             IStudentAttendanceRepository studentAttendanceRepo,
-            IMarkRepository markRepo)
+            IMarkRepository markRepo,
+            ISubjectRepository subjectRepo)
         {
             _studentRepo = studentRepo;
             _loginRepo = loginRepo;
@@ -45,6 +47,7 @@ namespace SchoolERP.Services
             _stripeService = stripeService;
             _studentAttendanceRepo = studentAttendanceRepo;
             _markRepo = markRepo;
+            _subjectRepo = subjectRepo;   
         }
 
         public async Task<StudentResponseDto> GetMyDetailsAsync(string admnNo)
@@ -296,6 +299,26 @@ namespace SchoolERP.Services
                 Date = m.Date,
                 MarksObtained = m.MarksObtained == -1 ? "Absent" : m.MarksObtained.ToString(),
                 TotalMarks = m.TotalMarks
+            }).ToList();
+        }
+
+        public async Task<List<SubjectResponseDto>> GetSubjectTeachersAsync(string admnNo)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+                
+            var subjects = await _subjectRepo.GetByClassAsync(student.Class, student.Sec);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed subject teachers");
+
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = student.Class,
+                Sec = student.Sec,
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
             }).ToList();
         }
     }

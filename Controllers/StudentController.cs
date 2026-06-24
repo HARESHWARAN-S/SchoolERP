@@ -97,6 +97,14 @@ namespace SchoolERP.Controllers
             return Ok(result);
         }
 
+        [HttpGet("subject-teachers")]
+        public async Task<IActionResult> GetSubjectTeachers()
+        {
+            string admnNo = GetCurrentUserId(); // ← class+sec fetched from student record
+            var result = await _studentService.GetSubjectTeachersAsync(admnNo);
+            return Ok(result);
+        }
+
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangeMyPassword([FromBody] ChangeMyPasswordDto dto)
         {
