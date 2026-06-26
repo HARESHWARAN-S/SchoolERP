@@ -4,8 +4,8 @@ namespace SchoolERP.Repositories.Interfaces
 {
     public interface IHomeworkRepository
     {
-        Task<Homework?> GetAsync(string Class, string sec, string subject, DateOnly date);
-        Task<List<Homework>> GetByClassAsync(string Class, string sec);
+        Task<Homework?> GetAsync(int classId, string subject, DateOnly date);
+        Task<List<Homework>> GetByClassIdAsync(int classId);
         Task AddAsync(Homework homework);
     }
 }

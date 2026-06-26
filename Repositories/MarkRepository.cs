@@ -14,15 +14,13 @@ namespace SchoolERP.Repositories
             _context = context;
         }
 
-        public async Task<bool> ExistsAsync(
-            string examName, string subject, string Class, string sec)
+        public async Task<bool> ExistsAsync(string examName, string subject, int classId)
         {
             return await _context.Marks
                 .AnyAsync(m =>
                     m.ExamName == examName &&
                     m.Subject == subject &&
-                    m.Class == Class &&
-                    m.Sec == sec);
+                    m.ClassId == classId);
         }
 
         public async Task<List<Mark>> GetByStudentAsync(string admnNo)

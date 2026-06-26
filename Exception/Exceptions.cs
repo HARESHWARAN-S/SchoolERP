@@ -224,4 +224,22 @@ namespace SchoolERP.Exceptions
         public NoActiveClassForCurrentYearException(string Class, string sec, string academicYear)
             : base($"No active class found for '{Class}-{sec}' in academic year '{academicYear}'") { }
     }
+
+        public class EmailNotRegisteredException : Exception
+    {
+        public EmailNotRegisteredException(string username)
+            : base($"No email registered for user '{username}'") { }
+    }
+
+    public class InvalidResetCodeException : Exception
+    {
+        public InvalidResetCodeException()
+            : base("Invalid reset code") { }
+    }
+
+    public class ResetCodeExpiredException : Exception
+    {
+        public ResetCodeExpiredException()
+            : base("Reset code has expired. Please request a new one") { }
+    }
 }

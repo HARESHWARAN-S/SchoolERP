@@ -8,8 +8,7 @@ namespace SchoolERP.Models.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int HomeworkId { get; set; }
-        public string Class { get; set; } = string.Empty;
-        public string Sec { get; set; } = string.Empty;
+        public int ClassId { get; set; } 
         public DateOnly Date { get; set; }
         public string Subject { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

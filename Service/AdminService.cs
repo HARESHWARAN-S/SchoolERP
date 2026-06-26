@@ -4,6 +4,7 @@ using SchoolERP.Models.Entities;
 using SchoolERP.Models.Enums;
 using SchoolERP.Repositories.Interfaces;
 using SchoolERP.Services.Interfaces;
+using SchoolERP.Helpers;
 
 namespace SchoolERP.Services
 {
@@ -61,7 +62,8 @@ namespace SchoolERP.Services
                 Username = adminId,
                 PasswordHash = passwordHash,
                 Role = UserRole.Admin,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                Email = dto.Email 
             };
             await _loginRepo.AddAsync(login);
 
@@ -96,7 +98,8 @@ namespace SchoolERP.Services
                 Username = newAdminId,
                 PasswordHash = passwordHash,
                 Role = UserRole.Admin,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                Email = dto.Email
             };
             await _loginRepo.AddAsync(newLogin);
 
@@ -143,7 +146,8 @@ namespace SchoolERP.Services
                 Username = teacherId,
                 PasswordHash = passwordHash,
                 Role = UserRole.Teacher,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                Email = dto.Email
             };
             await _loginRepo.AddAsync(login);
 
@@ -236,7 +240,8 @@ namespace SchoolERP.Services
                 Username = admnNo,
                 PasswordHash = passwordHash,
                 Role = UserRole.Student,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                Email = dto.Email
             };
             await _loginRepo.AddAsync(login);
 
@@ -452,7 +457,7 @@ namespace SchoolERP.Services
             PresentDays = s.PresentDays,
             AttendancePercentage = s.AttendancePercentage
         };
-
+        /*
         public async Task<StudentClassResponseDto> AddStudentClassAsync(CreateStudentClassDto dto)
         {
             var existing = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
@@ -508,6 +513,64 @@ namespace SchoolERP.Services
                 ClassTeacherId = studentClass.ClassTeacherId,
                 ClassTeacherName = teacher.Name,
                 //SubjectName = dto.SubjectName
+            };
+        }*/
+
+        public async Task<StudentClassResponseDto> AddStudentClassAsync(CreateStudentClassDto dto)
+        {
+            string academicYear = AcademicYearHelper.GetCurrentAcademicYear();
+
+            // Check class already exists for this academic year
+            var existing = await _studentClassRepo.GetCurrentAsync(dto.Class, dto.Sec, academicYear);
+            if (existing != null)
+                throw new StudentClassAlreadyExistsException(dto.Class, dto.Sec);
+
+            var teacher = await _teacherRepo.GetByIdAsync(dto.ClassTeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.ClassTeacherId);
+
+            var teacherStatus = await _loginRepo.GetStatusAsync(dto.ClassTeacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.ClassTeacherId);
+
+            // Check teacher not already class teacher for current year
+            var alreadyAssigned = await _studentClassRepo
+                .GetCurrentByClassTeacherIdAsync(dto.ClassTeacherId, academicYear);
+            if (alreadyAssigned != null)
+                throw new TeacherAlreadyAssignedAsClassTeacherException(dto.ClassTeacherId);
+
+            var studentClass = new StudentClass
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                AcademicYear = academicYear,               // ← auto set from helper
+                ClassTimetable = dto.ClassTimetable,
+                ClassTeacherId = dto.ClassTeacherId,
+                ClassStrength = dto.ClassStrength
+            };
+            await _studentClassRepo.AddAsync(studentClass);
+
+            // Add subject for class teacher using ClassId
+            var subject = new Subject
+            {
+                ClassId = studentClass.ClassId,            // ← use ClassId
+                SubjectName = dto.SubjectName,
+                TeacherId = dto.ClassTeacherId
+            };
+            await _subjectRepo.AddAsync(subject);
+
+            await _logRepo.AddAsync(
+                $"Admin added class '{dto.Class}-{dto.Sec}' for year '{academicYear}'");
+
+            return new StudentClassResponseDto
+            {
+                Class = studentClass.Class,
+                Sec = studentClass.Sec,
+                ClassTimetable = studentClass.ClassTimetable,
+                ClassTeacherId = studentClass.ClassTeacherId,
+                ClassTeacherName = teacher.Name,
+                //SubjectName = dto.SubjectName,
+                ClassStrength = studentClass.ClassStrength
             };
         }
 
@@ -578,7 +641,7 @@ namespace SchoolERP.Services
                 AttendancePercentage = teacher.AttendancePercentage
             };
         }
-
+        /*
         public async Task<SubjectResponseDto> AddSubjectAsync(CreateSubjectDto dto)
         {
             var studentClass = await _studentClassRepo.GetAsync(dto.Class, dto.Sec);
@@ -617,8 +680,47 @@ namespace SchoolERP.Services
                 TeacherId = subject.TeacherId,
                 TeacherName = teacher.Name
             };
-        }
+        }*/
 
+        public async Task<SubjectResponseDto> AddSubjectAsync(CreateSubjectDto dto)
+        {
+            // Get ClassId from class+sec using helper
+            int classId = await AcademicYearHelper.GetClassIdAsync(
+                dto.Class, dto.Sec, _studentClassRepo);
+
+            var teacher = await _teacherRepo.GetByIdAsync(dto.TeacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(dto.TeacherId);
+
+            var teacherStatus = await _loginRepo.GetStatusAsync(dto.TeacherId);
+            if (teacherStatus == UserStatus.Inactive)
+                throw new UserInactiveException(dto.TeacherId);
+
+            var existing = await _subjectRepo.GetAsync(classId, dto.SubjectName);
+            if (existing != null)
+                throw new SubjectAlreadyExistsException(dto.Class, dto.Sec, dto.SubjectName);
+
+            var subject = new Subject
+            {
+                ClassId = classId,                         // ← use ClassId
+                SubjectName = dto.SubjectName,
+                TeacherId = dto.TeacherId
+            };
+            await _subjectRepo.AddAsync(subject);
+
+            await _logRepo.AddAsync(
+                $"Admin added subject '{dto.SubjectName}' for class '{dto.Class}-{dto.Sec}'");
+
+            return new SubjectResponseDto
+            {
+                Class = dto.Class,
+                Sec = dto.Sec,
+                SubjectName = dto.SubjectName,
+                TeacherId = dto.TeacherId,
+                TeacherName = teacher.Name
+            };
+        }
+        /*
         public async Task<List<SubjectResponseDto>> GetAllSubjectsAsync()
         {
             var subjects = await _subjectRepo.GetAllAsync();
@@ -631,8 +733,20 @@ namespace SchoolERP.Services
                 TeacherId = s.TeacherId,
                 TeacherName = s.Teacher?.Name ?? "Unknown"
             }).ToList();
+        }*/
+        public async Task<List<SubjectResponseDto>> GetAllSubjectsAsync()
+        {
+            var subjects = await _subjectRepo.GetAllAsync();
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = s.StudentClass?.Class ?? "",
+                Sec = s.StudentClass?.Sec ?? "",
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
+            }).ToList();
         }
-
+        /*
         public async Task<List<SubjectResponseDto>> GetSubjectsByClassAsync(string Class, string sec)
         {
             var studentClass = await _studentClassRepo.GetAsync(Class, sec);
@@ -645,6 +759,21 @@ namespace SchoolERP.Services
             {
                 Class = s.Class,
                 Sec = s.Sec,
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
+            }).ToList();
+        }*/
+
+        public async Task<List<SubjectResponseDto>> GetSubjectsByClassAsync(string Class, string sec)
+        {
+            int classId = await AcademicYearHelper.GetClassIdAsync(Class, sec, _studentClassRepo);
+            var subjects = await _subjectRepo.GetByClassIdAsync(classId);
+
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = Class,
+                Sec = sec,
                 SubjectName = s.SubjectName,
                 TeacherId = s.TeacherId,
                 TeacherName = s.Teacher?.Name ?? "Unknown"

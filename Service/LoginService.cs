@@ -17,17 +17,20 @@ namespace SchoolERP.Services
         private readonly ILogRepository _logRepo;
         private readonly IConfiguration _config;
         private readonly ITokenBlacklistRepository _blacklistRepo;
+        private readonly IEmailService _emailService;
 
         public LoginService(
             ILoginRepository loginRepo,
             ILogRepository logRepo,
             ITokenBlacklistRepository blacklistRepo,
-            IConfiguration config)
+            IConfiguration config,
+            IEmailService emailService)
         {
             _loginRepo = loginRepo;
             _logRepo = logRepo;
             _blacklistRepo = blacklistRepo;
             _config = config;
+            _emailService = emailService;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
@@ -129,6 +132,76 @@ namespace SchoolERP.Services
             await _loginRepo.UpdateAsync(login);
 
             await _logRepo.AddAsync($"User '{username}' changed their password");
+        }
+        public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
+        {
+            var login = await _loginRepo.GetByUsernameAsync(dto.Username);
+            if (login == null)
+                throw new UserNotFoundException(dto.Username);
+
+            if (login.Status == UserStatus.Inactive)
+                throw new UserInactiveException(dto.Username);
+
+            if (string.IsNullOrEmpty(login.Email))
+                throw new EmailNotRegisteredException(dto.Username);
+
+            // Generate 8-character alphanumeric code
+            string code = GenerateResetCode();
+
+            // Store code + 5 min expiry in Login table
+            await _loginRepo.UpdateResetCodeAsync(
+                dto.Username,
+                code,
+                DateTime.UtcNow.AddMinutes(5));
+
+            // Send email
+            await _emailService.SendResetCodeAsync(login.Email, code, dto.Username);
+
+            await _logRepo.AddAsync(
+                $"Password reset code sent to email for user '{dto.Username}'");
+        }
+
+        public async Task ResetPasswordAsync(ResetPasswordDto dto)
+        {
+            var login = await _loginRepo.GetByUsernameAsync(dto.Username);
+            if (login == null)
+                throw new UserNotFoundException(dto.Username);
+
+            // Check code exists
+            if (string.IsNullOrEmpty(login.ResetCode))
+                throw new InvalidResetCodeException();
+
+            // Check expiry first — if expired, clear code and throw
+            if (login.ResetCodeExpiry == null || DateTime.UtcNow > login.ResetCodeExpiry)
+            {
+                // Clear expired code
+                await _loginRepo.UpdateResetCodeAsync(dto.Username, null, null);
+                throw new ResetCodeExpiredException();
+            }
+
+            // Check code matches
+            if (login.ResetCode != dto.Code)
+                throw new InvalidResetCodeException();
+
+            // Check new password not same as current
+            if (BCrypt.Net.BCrypt.Verify(dto.NewPassword, login.PasswordHash))
+                throw new SamePasswordException();
+
+            // Update password and clear reset code
+            login.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _loginRepo.UpdateAsync(login);
+            await _loginRepo.UpdateResetCodeAsync(dto.Username, null, null);
+
+            await _logRepo.AddAsync($"User '{dto.Username}' reset their password");
+        }
+
+        private string GenerateResetCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)])
+                .ToArray());
         }
     }
 }

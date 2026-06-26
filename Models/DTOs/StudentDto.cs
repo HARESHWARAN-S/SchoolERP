@@ -17,6 +17,7 @@ namespace SchoolERP.Models.DTOs
         public string Address { get; set; } = string.Empty;
         public string ContactNo { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public class UpdateStudentDto

@@ -4,6 +4,7 @@ using SchoolERP.Models.Entities;
 using SchoolERP.Repositories.Interfaces;
 using SchoolERP.Services.Interfaces;
 using SchoolERP.Models.Enums;
+using SchoolERP.Helpers;
 
 namespace SchoolERP.Services
 {
@@ -107,7 +108,7 @@ namespace SchoolERP.Services
                 throw new StudentClassNotFoundException(student.Class,student.Sec);
             return classes.ClassTimetable;
         }
-
+        /*
         public async Task<List<StudentHomeworkResponseDto>> GetHomeworkAsync(string admnNo)
         {
             var student = await _studentRepo.GetByIdAsync(admnNo);
@@ -121,6 +122,25 @@ namespace SchoolERP.Services
             var homeworks = await _homeworkRepo.GetByClassAsync(student.Class, student.Sec);
 
             await _logRepo.AddAsync($"Student '{admnNo}' viewed homework");
+
+            return homeworks.Select(h => new StudentHomeworkResponseDto
+            {
+                Date = h.Date,
+                Subject = h.Subject,
+                Description = h.Description
+            }).ToList();
+        }*/
+        public async Task<List<StudentHomeworkResponseDto>> GetHomeworkAsync(string admnNo)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            // Get ClassId from student's class+sec using helper
+            int classId = await AcademicYearHelper.GetClassIdAsync(
+                student.Class, student.Sec, _studentClassRepo);
+
+            var homeworks = await _homeworkRepo.GetByClassIdAsync(classId);
 
             return homeworks.Select(h => new StudentHomeworkResponseDto
             {
@@ -302,6 +322,7 @@ namespace SchoolERP.Services
             }).ToList();
         }
 
+        /*
         public async Task<List<SubjectResponseDto>> GetSubjectTeachersAsync(string admnNo)
         {
             var student = await _studentRepo.GetByIdAsync(admnNo);
@@ -309,6 +330,30 @@ namespace SchoolERP.Services
                 throw new StudentNotFoundException(admnNo);
                 
             var subjects = await _subjectRepo.GetByClassAsync(student.Class, student.Sec);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed subject teachers");
+
+            return subjects.Select(s => new SubjectResponseDto
+            {
+                Class = student.Class,
+                Sec = student.Sec,
+                SubjectName = s.SubjectName,
+                TeacherId = s.TeacherId,
+                TeacherName = s.Teacher?.Name ?? "Unknown"
+            }).ToList();
+        }*/
+
+        public async Task<List<SubjectResponseDto>> GetSubjectTeachersAsync(string admnNo)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            // Get ClassId from student's class+sec using helper
+            int classId = await AcademicYearHelper.GetClassIdAsync(
+                student.Class, student.Sec, _studentClassRepo);
+
+            var subjects = await _subjectRepo.GetByClassIdAsync(classId);
 
             await _logRepo.AddAsync($"Student '{admnNo}' viewed subject teachers");
 

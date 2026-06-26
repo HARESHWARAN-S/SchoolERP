@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SchoolERP.Contexts;
@@ -11,9 +12,11 @@ using SchoolERP.Contexts;
 namespace SchoolERP.Migrations
 {
     [DbContext(typeof(SchoolERPDbContext))]
-    partial class SchoolERPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624112213_AddEmailAndResetCodeToLogin")]
+    partial class AddEmailAndResetCodeToLogin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,13 +147,18 @@ namespace SchoolERP.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HomeworkId"));
 
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Class")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sec")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -160,7 +168,7 @@ namespace SchoolERP.Migrations
 
                     b.HasKey("HomeworkId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("Class", "Sec");
 
                     b.ToTable("Homeworks");
                 });
@@ -229,8 +237,9 @@ namespace SchoolERP.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Class")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
@@ -243,6 +252,10 @@ namespace SchoolERP.Migrations
                         .HasPrecision(6, 2)
                         .HasColumnType("numeric(6,2)");
 
+                    b.Property<string>("Sec")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("text");
@@ -254,8 +267,6 @@ namespace SchoolERP.Migrations
                     b.HasKey("MarkId");
 
                     b.HasIndex("AdmnNo");
-
-                    b.HasIndex("ClassId");
 
                     b.ToTable("Marks");
                 });
@@ -272,9 +283,8 @@ namespace SchoolERP.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Target")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Target")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp without time zone");
@@ -397,8 +407,13 @@ namespace SchoolERP.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Class")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sec")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -406,25 +421,15 @@ namespace SchoolERP.Migrations
 
                     b.HasKey("AdmnNo", "Date");
 
-                    b.HasIndex("ClassId");
-
                     b.ToTable("StudentAttendances");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.StudentClass", b =>
                 {
-                    b.Property<int>("ClassId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ClassId"));
-
-                    b.Property<string>("AcademicYear")
-                        .IsRequired()
+                    b.Property<string>("Class")
                         .HasColumnType("text");
 
-                    b.Property<string>("Class")
-                        .IsRequired()
+                    b.Property<string>("Sec")
                         .HasColumnType("text");
 
                     b.Property<int>("ClassStrength")
@@ -438,16 +443,9 @@ namespace SchoolERP.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Sec")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.HasKey("Class", "Sec");
 
-                    b.HasKey("ClassId");
-
-                    b.HasIndex("ClassTeacherId", "AcademicYear")
-                        .IsUnique();
-
-                    b.HasIndex("Class", "Sec", "AcademicYear")
+                    b.HasIndex("ClassTeacherId")
                         .IsUnique();
 
                     b.ToTable("StudentClasses");
@@ -455,8 +453,11 @@ namespace SchoolERP.Migrations
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Subject", b =>
                 {
-                    b.Property<int>("ClassId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Class")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sec")
+                        .HasColumnType("text");
 
                     b.Property<string>("SubjectName")
                         .HasColumnType("text");
@@ -465,7 +466,7 @@ namespace SchoolERP.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("ClassId", "SubjectName");
+                    b.HasKey("Class", "Sec", "SubjectName");
 
                     b.HasIndex("TeacherId");
 
@@ -573,7 +574,7 @@ namespace SchoolERP.Migrations
                 {
                     b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
                         .WithMany()
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("Class", "Sec")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -588,15 +589,7 @@ namespace SchoolERP.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Student");
-
-                    b.Navigation("StudentClass");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Payment", b =>
@@ -637,22 +630,14 @@ namespace SchoolERP.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Student");
-
-                    b.Navigation("StudentClass");
                 });
 
             modelBuilder.Entity("SchoolERP.Models.Entities.StudentClass", b =>
                 {
                     b.HasOne("SchoolERP.Models.Entities.Teacher", "ClassTeacher")
-                        .WithMany()
-                        .HasForeignKey("ClassTeacherId")
+                        .WithOne()
+                        .HasForeignKey("SchoolERP.Models.Entities.StudentClass", "ClassTeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -661,15 +646,15 @@ namespace SchoolERP.Migrations
 
             modelBuilder.Entity("SchoolERP.Models.Entities.Subject", b =>
                 {
-                    b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SchoolERP.Models.Entities.Teacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SchoolERP.Models.Entities.StudentClass", "StudentClass")
+                        .WithMany()
+                        .HasForeignKey("Class", "Sec")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

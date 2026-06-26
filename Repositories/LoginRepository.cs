@@ -39,5 +39,16 @@ namespace SchoolERP.Repositories
             _context.Logins.Update(login);
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateResetCodeAsync(string username, string? code, DateTime? expiry)
+        {
+            var login = await _context.Logins
+                .FirstOrDefaultAsync(l => l.Username == username);
+            if (login != null)
+            {
+                login.ResetCode = code;
+                login.ResetCodeExpiry = expiry;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace SchoolERP.Models.DTOs
         public string ContactNo { get; set; } = string.Empty;
         public string PhotoUrl { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public class CreateAdminDto
@@ -22,6 +23,7 @@ namespace SchoolERP.Models.DTOs
         public string ContactNo { get; set; } = string.Empty;
         public string PhotoUrl { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public class UpdateAdminDto

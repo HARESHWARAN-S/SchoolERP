@@ -14,20 +14,19 @@ namespace SchoolERP.Repositories
             _context = context;
         }
 
-        public async Task<Homework?> GetAsync(string Class, string sec, string subject, DateOnly date)
+        public async Task<Homework?> GetAsync(int classId, string subject, DateOnly date)
         {
             return await _context.Homeworks
                 .FirstOrDefaultAsync(h =>
-                    h.Class == Class &&
-                    h.Sec == sec &&
+                    h.ClassId == classId &&
                     h.Subject == subject &&
                     h.Date == date);
         }
 
-        public async Task<List<Homework>> GetByClassAsync(string Class, string sec)
+        public async Task<List<Homework>> GetByClassIdAsync(int classId)
         {
             return await _context.Homeworks
-                .Where(h => h.Class == Class && h.Sec == sec)
+                .Where(h => h.ClassId == classId)
                 .OrderByDescending(h => h.Date)
                 .ToListAsync();
         }

@@ -13,6 +13,9 @@ namespace SchoolERP.Models.Entities
         public UserRole Role { get; set; }
 
         public UserStatus Status { get; set; } = UserStatus.Active;
+        public string Email { get; set; }                   
+        public string? ResetCode { get; set; }               
+        public DateTime? ResetCodeExpiry { get; set; } 
         public Admin? Admin { get; set; }
         public Teacher? Teacher { get; set; }
         public Student? Student { get; set; }

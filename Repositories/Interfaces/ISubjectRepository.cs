@@ -4,12 +4,13 @@ namespace SchoolERP.Repositories.Interfaces
 {
     public interface ISubjectRepository
     {
-        Task<Subject?> GetAsync(string Class, string sec, string subjectName);
+        Task<Subject?> GetAsync(int classId, string subjectName);
         Task<List<Subject>> GetAllAsync();
-        Task<List<Subject>> GetByClassAsync(string Class, string sec);
+        Task<List<Subject>> GetByClassAsync(int classId);
         Task AddAsync(Subject subject);
-        Task<Subject?> GetByClassSecSubjectTeacherAsync(string Class, string sec, string subject, string teacherId);
-        Task<Subject?> GetByTeacherAsync(string Class, string sec, string teacherId);
+        Task<Subject?> GetByClassSecSubjectTeacherAsync(int classId, string subject, string teacherId);
+        Task<Subject?> GetByTeacherAsync(int classId, string teacherId);
+        Task<List<Subject>> GetByClassIdAsync(int classId);
         
     }
 }

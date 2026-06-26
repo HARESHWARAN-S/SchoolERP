@@ -15,10 +15,10 @@ namespace SchoolERP.Repositories
             _context = context;
         }
 
-        public async Task<bool> ExistsAsync(string Class, string sec, DateOnly date)
+        public async Task<bool> ExistsAsync(int classId, DateOnly date)
         {
             return await _context.StudentAttendances
-                .AnyAsync(sa => sa.Class == Class && sa.Sec == sec && sa.Date == date);
+                .AnyAsync(sa => sa.ClassId == classId && sa.Date == date);
         }
 
         public async Task<List<StudentAttendance>> GetAbsentDatesAsync(string admnNo)

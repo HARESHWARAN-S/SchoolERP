@@ -53,6 +53,9 @@ namespace SchoolERP.Middleware
                         DuplicateContactNoException                     => 409,
                         StudentContactMismatchException                 => 409,
                         NoActiveClassForCurrentYearException            => 404,
+                        EmailNotRegisteredException                     => 400,
+                        InvalidResetCodeException                       => 400,
+                        ResetCodeExpiredException                       => 400,
                         _                                               => 500
                     };
 

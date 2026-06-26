@@ -64,5 +64,25 @@ namespace SchoolERP.Repositories
             return await _context.StudentClasses
                 .AnyAsync(sc => sc.ClassTimetable == timetableUrl);
         }
+
+        public async Task<StudentClass?> GetCurrentAsync(string Class, string sec, string academicYear)
+        {
+            return await _context.StudentClasses
+                .Include(sc => sc.ClassTeacher)
+                .FirstOrDefaultAsync(sc =>
+                    sc.Class == Class &&
+                    sc.Sec == sec &&
+                    sc.AcademicYear == academicYear);
+        }
+
+        public async Task<StudentClass?> GetCurrentByClassTeacherIdAsync(
+            string teacherId, string academicYear)
+        {
+            return await _context.StudentClasses
+                .Include(sc => sc.ClassTeacher)
+                .FirstOrDefaultAsync(sc =>
+                    sc.ClassTeacherId == teacherId &&
+                    sc.AcademicYear == academicYear);
+        }
     }
 }

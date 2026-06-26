@@ -4,8 +4,7 @@ namespace SchoolERP.Models.Entities
 {
     public class Subject
     {
-        public string Class { get; set; } = string.Empty;
-        public string Sec { get; set; } = string.Empty;
+        public int ClassId { get; set; } 
         public string SubjectName { get; set; } = string.Empty;
         public string TeacherId { get; set; } = string.Empty;
 

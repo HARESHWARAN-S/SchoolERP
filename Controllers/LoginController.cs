@@ -43,5 +43,21 @@ namespace SchoolERP.Controllers
             return Ok("Password changed successfully");
         }
 
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+        {
+            await _loginService.ForgotPasswordAsync(dto);
+            return Ok("Reset code sent to your registered email");
+        }
+
+        // Reset Password — verifies code and sets new password
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            await _loginService.ResetPasswordAsync(dto);
+            return Ok("Password reset successfully. Please login with your new password.");
+        }
     }
 }

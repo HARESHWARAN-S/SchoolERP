@@ -9,5 +9,6 @@ namespace SchoolERP.Repositories.Interfaces
         Task<UserStatus?> GetStatusAsync(string username);
         Task AddAsync(Login login);
         Task UpdateAsync(Login login);
+        Task UpdateResetCodeAsync(string username, string? code, DateTime? expiry);
     }
 }

@@ -8,5 +8,7 @@ namespace SchoolERP.Services.Interfaces
         Task ChangePasswordAsync(ChangePasswordDto dto);
         Task LogoutAsync(string username, string token); 
         Task ChangeMyPasswordAsync(string username, string newPassword);
+        Task ForgotPasswordAsync(ForgotPasswordDto dto);
+        Task ResetPasswordAsync(ResetPasswordDto dto);
     }
 }

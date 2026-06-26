@@ -12,11 +12,11 @@ namespace SchoolERP.Models.Entities
         public string ExamName { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
         public DateOnly Date { get; set; }
-        public string Class { get; set; } = string.Empty;
-        public string Sec { get; set; } = string.Empty;
+        public int ClassId { get; set; } 
         public decimal MarksObtained { get; set; }
         public decimal TotalMarks { get; set; }
 
         public Student? Student { get; set; }
+        public StudentClass? StudentClass { get; set; }
     }
 }
