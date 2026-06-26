@@ -21,7 +21,8 @@ namespace SchoolERP.Services
         private readonly IStripeService _stripeService;
         private readonly IStudentAttendanceRepository _studentAttendanceRepo;
         private readonly IMarkRepository _markRepo;
-        private readonly ISubjectRepository _subjectRepo;  
+        private readonly ISubjectRepository _subjectRepo;
+        private readonly IPTMRepository _ptmRepo;   
 
         public StudentService(
             IStudentRepository studentRepo,
@@ -35,7 +36,8 @@ namespace SchoolERP.Services
             IStripeService stripeService,
             IStudentAttendanceRepository studentAttendanceRepo,
             IMarkRepository markRepo,
-            ISubjectRepository subjectRepo)
+            ISubjectRepository subjectRepo,
+            IPTMRepository ptmRepo)
         {
             _studentRepo = studentRepo;
             _loginRepo = loginRepo;
@@ -49,6 +51,7 @@ namespace SchoolERP.Services
             _studentAttendanceRepo = studentAttendanceRepo;
             _markRepo = markRepo;
             _subjectRepo = subjectRepo;   
+            _ptmRepo = ptmRepo; 
         }
 
         public async Task<StudentResponseDto> GetMyDetailsAsync(string admnNo)
@@ -365,6 +368,37 @@ namespace SchoolERP.Services
                 TeacherId = s.TeacherId,
                 TeacherName = s.Teacher?.Name ?? "Unknown"
             }).ToList();
+        }
+
+        public async Task<List<StudentPTMResponseDto>> GetPTMDetailsAsync(string admnNo)
+        {
+            var student = await _studentRepo.GetByIdAsync(admnNo);
+            if (student == null)
+                throw new StudentNotFoundException(admnNo);
+
+            // Get ClassId for current academic year
+            int classId = await AcademicYearHelper.GetClassIdAsync(
+                student.Class, student.Sec, _studentClassRepo);
+
+            // Get all PTM entries for this student in current class
+            var ptms = await _ptmRepo.GetByStudentAndClassIdAsync(admnNo, classId);
+
+            await _logRepo.AddAsync($"Student '{admnNo}' viewed PTM details");
+
+            return await Task.WhenAll(ptms.Select(async p =>
+            {
+                // Fetch teacher's subject for this class
+                var subjectRecord = await _subjectRepo.GetByTeacherAsync(classId, p.TeacherId);
+                string subjectName = subjectRecord?.SubjectName ?? "Class Teacher";
+
+                return new StudentPTMResponseDto
+                {
+                    Date = p.Date,
+                    TeacherName = p.Teacher?.Name ?? "Unknown",
+                    Subject = subjectName,
+                    Remarks = p.Remarks
+                };
+            })).ContinueWith(t => t.Result.ToList());
         }
     }
 }

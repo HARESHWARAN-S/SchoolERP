@@ -56,6 +56,11 @@ namespace SchoolERP.Middleware
                         EmailNotRegisteredException                     => 400,
                         InvalidResetCodeException                       => 400,
                         ResetCodeExpiredException                       => 400,
+                        ClassNotFoundForNewYearException                => 404,
+                        PromotionListMismatchException                  => 400,
+                        InvalidPromotionValueException                  => 400,
+                        PTMAlreadyExistsException                       => 409,
+                        NotAuthorizedForClassException                  => 403,
                         _                                               => 500
                     };
 

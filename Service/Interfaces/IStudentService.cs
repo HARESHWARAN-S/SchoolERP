@@ -14,5 +14,6 @@ namespace SchoolERP.Services.Interfaces
         Task<List<LeaveDetailsResponseDto>> GetLeaveDetailsAsync(string admnNo);
         Task<List<StudentMarkResponseDto>> GetMarksAsync(string admnNo);
         Task<List<SubjectResponseDto>> GetSubjectTeachersAsync(string admnNo);
+        Task<List<StudentPTMResponseDto>> GetPTMDetailsAsync(string admnNo);
     }
 }

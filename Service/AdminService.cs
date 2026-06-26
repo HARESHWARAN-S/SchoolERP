@@ -533,27 +533,30 @@ namespace SchoolERP.Services
             if (teacherStatus == UserStatus.Inactive)
                 throw new UserInactiveException(dto.ClassTeacherId);
 
-            // Check teacher not already class teacher for current year
+            // *** MODIFIED ***
+            // Check teacher not already class teacher for ANY class in current academic year
             var alreadyAssigned = await _studentClassRepo
                 .GetCurrentByClassTeacherIdAsync(dto.ClassTeacherId, academicYear);
             if (alreadyAssigned != null)
                 throw new TeacherAlreadyAssignedAsClassTeacherException(dto.ClassTeacherId);
 
+            if (string.IsNullOrWhiteSpace(dto.SubjectName))
+                throw new ArgumentException("Subject name cannot be empty");
+
             var studentClass = new StudentClass
             {
                 Class = dto.Class,
                 Sec = dto.Sec,
-                AcademicYear = academicYear,               // ← auto set from helper
+                AcademicYear = academicYear,
                 ClassTimetable = dto.ClassTimetable,
                 ClassTeacherId = dto.ClassTeacherId,
                 ClassStrength = dto.ClassStrength
             };
             await _studentClassRepo.AddAsync(studentClass);
 
-            // Add subject for class teacher using ClassId
             var subject = new Subject
             {
-                ClassId = studentClass.ClassId,            // ← use ClassId
+                ClassId = studentClass.ClassId,
                 SubjectName = dto.SubjectName,
                 TeacherId = dto.ClassTeacherId
             };
@@ -1008,6 +1011,166 @@ namespace SchoolERP.Services
                 TotalDays = teacher.TotalDays,
                 PresentDays = teacher.PresentDays,
                 AttendancePercentage = teacher.AttendancePercentage
+            };
+        }
+
+        public async Task<PromoteClassResponseDto> PromoteClassAsync(PromoteClassDto dto)
+        {
+            // ── Step 1: Get previous academic year ───────────────────────
+            string? previousYear = await _studentClassRepo.GetPreviousAcademicYearAsync();
+            if (previousYear == null)
+                throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+
+            string currentYear = AcademicYearHelper.GetCurrentAcademicYear();
+
+            // ── Step 2: Get the previous year's class ─────────────────────
+            var previousClass = await _studentClassRepo.GetCurrentAsync(
+                dto.Class, dto.Sec, previousYear);
+            if (previousClass == null)
+                throw new StudentClassNotFoundException(dto.Class, dto.Sec);
+
+            // ── Step 3: Validate promotion list length ────────────────────
+            if (dto.Promotions.Count != previousClass.ClassStrength)
+                throw new PromotionListMismatchException(
+                    previousClass.ClassStrength, dto.Promotions.Count);
+
+            // ── Step 4: Validate all promotion values ─────────────────────
+            foreach (var p in dto.Promotions)
+            {
+                if (p != "-1" && p != "0" &&
+                    !System.Text.RegularExpressions.Regex.IsMatch(p, @"^[A-Za-z]$"))
+                    throw new InvalidPromotionValueException(p);
+            }
+
+            // ── Step 5: Determine next class ─────────────────────────────
+            bool isClass12 = dto.Class == "12";
+            string nextClass = isClass12
+                ? dto.Class
+                : (int.Parse(dto.Class) + 1).ToString();
+
+            // ── Step 6: Check all target classes exist for current year ───
+            // Collect all unique target class+sec combinations
+            var targetClasses = dto.Promotions
+                .Where(p => p != "-1" && p != "0")
+                .Select(p => new { Class = nextClass, Sec = p.ToUpper() })
+                .Distinct()
+                .ToList();
+
+            // Also add same class+sec for failed students (value = "0")
+            bool hasFailed = dto.Promotions.Any(p => p == "0");
+            if (hasFailed)
+                targetClasses.Add(new { Class = dto.Class, Sec = dto.Sec });
+
+            // Check each target class exists in current academic year
+            var missingClasses = new List<string>();
+            foreach (var tc in targetClasses)
+            {
+                var exists = await _studentClassRepo.GetCurrentAsync(tc.Class, tc.Sec, currentYear);
+                if (exists == null)
+                    missingClasses.Add($"{tc.Class}-{tc.Sec}");
+            }
+            if (missingClasses.Any())
+                throw new ClassNotFoundForNewYearException(missingClasses, currentYear);
+
+            // ── Step 7: Get students ordered by roll number ───────────────
+            var students = await _studentRepo.GetByClassSecOrderedAsync(dto.Class, dto.Sec);
+            if (students.Any(s => s.RollNo == 0))
+                throw new RollNumberNotAssignedException(dto.Class, dto.Sec);
+
+            // ── Step 8: Process each student ─────────────────────────────
+            int promoted = 0, failed = 0, left = 0;
+            var details = new List<PromotionDetailDto>();
+
+            for (int i = 0; i < students.Count; i++)
+            {
+                var student = students[i];
+                string promotion = dto.Promotions[i];
+
+                var detail = new PromotionDetailDto
+                {
+                    AdmnNo = student.AdmnNo,
+                    Name = student.Name,
+                    OldRollNo = student.RollNo,
+                    OldClass = student.Class,
+                    OldSec = student.Sec
+                };
+
+                if (promotion == "-1" || (isClass12 && promotion != "0"))
+                {
+                    // Student leaves school → inactive
+                    var login = await _loginRepo.GetByUsernameAsync(student.AdmnNo);
+                    if (login != null)
+                    {
+                        login.Status = UserStatus.Inactive;
+                        await _loginRepo.UpdateAsync(login);
+                    }
+                    student.RollNo = -1;
+                    detail.NewClass = student.Class;
+                    detail.NewSec = student.Sec;
+                    detail.Status = "Left";
+                    left++;
+                }
+                else if (promotion == "0")
+                {
+                    // Student fails → stays in same class+sec, roll reset to 0
+                    student.RollNo = 0;
+                    detail.NewClass = student.Class;
+                    detail.NewSec = student.Sec;
+                    detail.Status = "Failed";
+                    failed++;
+                }
+                else
+                {
+                    // Student promoted → move to next class + new section
+                    string newSec = promotion.ToUpper();
+                    student.Class = nextClass;
+                    student.Sec = newSec;
+                    student.RollNo = 0; // reset, will be reassigned
+                    detail.NewClass = nextClass;
+                    detail.NewSec = newSec;
+                    detail.Status = "Promoted";
+                    promoted++;
+                }
+
+                details.Add(detail);
+                await _studentRepo.UpdateAsync(student);
+            }
+
+            // ── Step 9: Update ClassStrength for all affected classes ─────
+            // Recalculate strength for each class in current year
+            // that received students or lost students
+            var affectedClasses = details
+                .Select(d => new { d.NewClass, d.NewSec })
+                .Distinct()
+                .ToList();
+
+            foreach (var ac in affectedClasses)
+            {
+                var classRecord = await _studentClassRepo.GetCurrentAsync(
+                    ac.NewClass, ac.NewSec, currentYear);
+                if (classRecord != null)
+                {
+                    // Count active students in this class
+                    var activeCount = await _studentRepo.CountActiveInClassAsync(
+                        ac.NewClass, ac.NewSec);
+                    classRecord.ClassStrength = activeCount;
+                    await _studentClassRepo.UpdateAsync(classRecord);
+                }
+            }
+
+            await _logRepo.AddAsync(
+                $"Admin promoted class '{dto.Class}-{dto.Sec}' from '{previousYear}' " +
+                $"→ Promoted: {promoted}, Failed: {failed}, Left: {left}");
+
+            return new PromoteClassResponseDto
+            {
+                PreviousClass = dto.Class,
+                PreviousSec = dto.Sec,
+                AcademicYear = currentYear,
+                Promoted = promoted,
+                Failed = failed,
+                Left = left,
+                Details = details
             };
         }
     }

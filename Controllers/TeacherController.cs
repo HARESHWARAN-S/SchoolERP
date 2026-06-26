@@ -113,5 +113,13 @@ namespace SchoolERP.Controllers
                 message = "Logged out successfully. Please login again."
             });
         }
+
+        [HttpPost("add-ptm")]
+        public async Task<IActionResult> AddPTM([FromBody] AddPTMDto dto)
+        {
+            string teacherId = GetCurrentUserId();
+            var result = await _teacherService.AddPTMAsync(teacherId, dto);
+            return Ok(result);
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace SchoolERP.Services
         private readonly IStudentAttendanceRepository _studentAttendanceRepo; // ← ADD
         private readonly IStudentClassRepository _studentClassRepo;  
         private readonly IMarkRepository _markRepo;
+        private readonly IPTMRepository _ptmRepo;
         
         public TeacherService(
             ITeacherRepository teacherRepo,
@@ -31,6 +32,7 @@ namespace SchoolERP.Services
             IHomeworkRepository homeworkRepo,       
             ISubjectRepository subjectRepo,         
             IStudentRepository studentRepo,
+            IPTMRepository ptmRepo,
             IStudentAttendanceRepository studentAttendanceRepo, 
             IStudentClassRepository studentClassRepo,
             IMarkRepository markRepo) 
@@ -46,6 +48,7 @@ namespace SchoolERP.Services
             _studentAttendanceRepo = studentAttendanceRepo; 
             _studentClassRepo = studentClassRepo;   
             _markRepo = markRepo; 
+            _ptmRepo = ptmRepo;
         }
 
         public async Task<TeacherResponseDto> GetMyDetailsAsync(string teacherId)
@@ -614,6 +617,67 @@ namespace SchoolERP.Services
                 Date = mark.Date,
                 MarksObtained = mark.MarksObtained == -1 ? "Absent" : mark.MarksObtained.ToString(),
                 TotalMarks = mark.TotalMarks
+            };
+        }
+
+        public async Task<PTMResponseDto> AddPTMAsync(string teacherId, AddPTMDto dto)
+        {
+            var teacher = await _teacherRepo.GetByIdAsync(teacherId);
+            if (teacher == null)
+                throw new TeacherNotFoundException(teacherId);
+
+            // Get ClassId from class+sec using helper
+            int classId = await AcademicYearHelper.GetClassIdAsync(
+                dto.Class, dto.Sec, _studentClassRepo);
+
+            // Check teacher is class teacher OR subject teacher for this class
+            var isClassTeacher = await _studentClassRepo.GetCurrentByClassTeacherIdAsync(
+                teacherId, AcademicYearHelper.GetCurrentAcademicYear());
+            var isSubjectTeacher = await _subjectRepo.GetByTeacherAsync(classId, teacherId);
+
+            bool hasAccess = (isClassTeacher != null && isClassTeacher.ClassId == classId)
+                        || (isSubjectTeacher != null);
+
+            if (!hasAccess)
+                throw new NotAuthorizedForClassException(teacherId, dto.Class, dto.Sec);
+
+            // Get student by rollNo
+            var student = await _studentRepo.GetByClassSecRollNoAsync(dto.Class, dto.Sec, dto.RollNo);
+            if (student == null)
+                throw new StudentNotFoundException($"RollNo {dto.RollNo} in {dto.Class}-{dto.Sec}");
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            // Check duplicate PTM entry
+            var existing = await _ptmRepo.GetAsync(student.AdmnNo, teacherId, today);
+            if (existing != null)
+                throw new PTMAlreadyExistsException(student.AdmnNo, teacherId, today);
+
+            // Get subject name for this teacher in this class
+            string subjectName = isSubjectTeacher?.SubjectName ?? "Class Teacher";
+
+            var ptm = new PTM
+            {
+                Date = today,
+                AdmnNo = student.AdmnNo,
+                TeacherId = teacherId,
+                ClassId = classId,
+                Remarks = dto.Remarks
+            };
+            await _ptmRepo.AddAsync(ptm);
+
+            await _logRepo.AddAsync(
+                $"Teacher '{teacherId}' added PTM entry for student '{student.AdmnNo}'");
+
+            return new PTMResponseDto
+            {
+                Date = ptm.Date,
+                AdmnNo = student.AdmnNo,
+                StudentName = student.Name,
+                TeacherId = teacherId,
+                TeacherName = teacher.Name,
+                Subject = subjectName,
+                Remarks = ptm.Remarks
             };
         }
     }

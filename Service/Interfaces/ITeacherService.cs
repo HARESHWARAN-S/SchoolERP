@@ -12,5 +12,6 @@ namespace SchoolERP.Services.Interfaces
         Task<List<StudentAttendanceResponseDto>> MarkStudentAttendanceAsync(string teacherId, MarkStudentAttendanceDto dto);
         Task<List<MarkEntryResponseDto>> AddMarksAsync(string teacherId, MarkEntryDto dto);
         Task<UpdateMarkResponseDto> UpdateMarksAsync(string teacherId, UpdateMarkDto dto);
+        Task<PTMResponseDto> AddPTMAsync(string teacherId, AddPTMDto dto);
     }
 }

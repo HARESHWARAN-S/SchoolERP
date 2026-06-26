@@ -31,6 +31,7 @@ namespace SchoolERP.Contexts
         public DbSet<StudentAttendance> StudentAttendances { get; set; }
         public DbSet<Mark> Marks { get; set; }
         public DbSet<AdminAttendance> AdminAttendances { get; set; }
+        public DbSet<PTM> PTMs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -271,6 +272,29 @@ namespace SchoolERP.Contexts
                 .HasOne(aa => aa.Admin)
                 .WithMany()
                 .HasForeignKey(aa => aa.AdminId);
+
+            // Add in OnModelCreating
+            // Composite PK (Date, AdmnNo, TeacherId)
+            modelBuilder.Entity<PTM>()
+                .HasKey(p => new { p.Date, p.AdmnNo, p.TeacherId });
+
+            // PTM -> Student
+            modelBuilder.Entity<PTM>()
+                .HasOne(p => p.Student)
+                .WithMany()
+                .HasForeignKey(p => p.AdmnNo);
+
+            // PTM -> Teacher
+            modelBuilder.Entity<PTM>()
+                .HasOne(p => p.Teacher)
+                .WithMany()
+                .HasForeignKey(p => p.TeacherId);
+
+            // PTM -> StudentClass
+            modelBuilder.Entity<PTM>()
+                .HasOne(p => p.StudentClass)
+                .WithMany()
+                .HasForeignKey(p => p.ClassId);
         }
     }
 }

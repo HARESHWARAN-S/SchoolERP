@@ -224,5 +224,12 @@ namespace SchoolERP.Controllers
                 message = "Logged out successfully. Please login again."
             });
         }
+
+        [HttpPost("promote-class")]
+        public async Task<IActionResult> PromoteClass([FromBody] PromoteClassDto dto)
+        {
+            var result = await _adminService.PromoteClassAsync(dto);
+            return Ok(result);
+        }
     }
 }

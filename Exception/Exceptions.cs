@@ -242,4 +242,35 @@ namespace SchoolERP.Exceptions
         public ResetCodeExpiredException()
             : base("Reset code has expired. Please request a new one") { }
     }
+        public class ClassNotFoundForNewYearException : Exception
+    {
+        public ClassNotFoundForNewYearException(List<string> missingClasses, string academicYear)
+            : base($"The following classes do not exist for academic year '{academicYear}': " +
+                   string.Join(", ", missingClasses)) { }
+    }
+
+    public class PromotionListMismatchException : Exception
+    {
+        public PromotionListMismatchException(int expected, int actual)
+            : base($"Promotion list length '{actual}' does not match class strength '{expected}'") { }
+    }
+
+    public class InvalidPromotionValueException : Exception
+    {
+        public InvalidPromotionValueException(string value)
+            : base($"Invalid promotion value '{value}'. Must be a section letter (A,B..), '0' for fail, or '-1' for leave") { }
+    }
+
+    public class PTMAlreadyExistsException : Exception
+    {
+        public PTMAlreadyExistsException(string admnNo, string teacherId, DateOnly date)
+            : base($"PTM entry already exists for student '{admnNo}' with teacher '{teacherId}' on '{date}'") { }
+    }
+
+    public class NotAuthorizedForClassException : Exception
+    {
+        public NotAuthorizedForClassException(string teacherId, string Class, string sec)
+            : base($"Teacher '{teacherId}' is neither class teacher nor subject teacher for class '{Class}-{sec}'") { }
+    }
+
 }

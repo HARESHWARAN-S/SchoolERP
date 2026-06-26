@@ -114,5 +114,19 @@ namespace SchoolERP.Repositories
                 .Where(s => s.ContactNo == contactNo)
                 .ToListAsync();
         }
+
+        public async Task<int> CountActiveInClassAsync(string Class, string sec)
+        {
+            return await _context.Students
+                .Join(_context.Logins,
+                    s => s.AdmnNo,
+                    l => l.Username,
+                    (s, l) => new { Student = s, Login = l })
+                .CountAsync(x =>
+                    x.Student.Class == Class &&
+                    x.Student.Sec == sec &&
+                    x.Login.Status == UserStatus.Active &&
+                    x.Student.RollNo != -1);
+        }
     }
 }

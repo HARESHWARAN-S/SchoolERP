@@ -128,5 +128,13 @@ namespace SchoolERP.Controllers
                 message = "Logged out successfully. Please login again."
             });
         }
+
+        [HttpGet("ptm-details")]
+        public async Task<IActionResult> GetPTMDetails()
+        {
+            string admnNo = GetCurrentUserId();
+            var result = await _studentService.GetPTMDetailsAsync(admnNo);
+            return Ok(result);
+        }
     }
 }

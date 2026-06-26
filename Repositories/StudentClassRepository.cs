@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolERP.Contexts;
 using SchoolERP.Models.Entities;
 using SchoolERP.Repositories.Interfaces;
+using SchoolERP.Helpers;
 
 namespace SchoolERP.Repositories
 {
@@ -83,6 +84,19 @@ namespace SchoolERP.Repositories
                 .FirstOrDefaultAsync(sc =>
                     sc.ClassTeacherId == teacherId &&
                     sc.AcademicYear == academicYear);
+        }
+
+        public async Task<string?> GetPreviousAcademicYearAsync()
+        {
+            string current = AcademicYearHelper.GetCurrentAcademicYear();
+            // e.g. current = "2026-2027" → previous = "2025-2026"
+            int currentStartYear = int.Parse(current.Split('-')[0]);
+            string previous = $"{currentStartYear - 1}-{currentStartYear}";
+
+            // Check if previous year actually exists in DB
+            bool exists = await _context.StudentClasses
+                .AnyAsync(sc => sc.AcademicYear == previous);
+            return exists ? previous : null;
         }
     }
 }
